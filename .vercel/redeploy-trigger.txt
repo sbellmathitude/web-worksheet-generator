@@ -1,0 +1,2 @@
+Trigger redeploy: chore commit to force Vercel to build latest main.
+Timestamp: 2026-08-19T20:58:00Z
