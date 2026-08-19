@@ -1,0 +1,2 @@
+Trigger redeploy to force Vercel to build latest main.
+Timestamp: 2026-08-19T21:06:00Z
