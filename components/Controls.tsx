@@ -180,5 +180,3 @@ export const Controls: React.FC<Props> = ({ onGenerate }) => {
     </form>
   );
 };
-EOF
-},{
