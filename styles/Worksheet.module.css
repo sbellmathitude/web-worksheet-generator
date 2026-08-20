@@ -1,150 +1,39 @@
+/* Worksheet styles adjusted to center content and make cells wider/square-like */
 .sheet {
-  background: var(--paper);
-  padding: 14px;
-  border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background: white;
+  padding: 18px;
+  border-radius: 8px;
 }
-
-/* Header with logo on the left and centered title */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  margin-bottom: 12px;
 }
+.headerLeft { display:flex; align-items:center; }
+.logo { height:40px; width:auto; margin-right:12px; }
+.headerCenter { text-align:center; flex:1; }
+.title { font-family: 'Original Surfer', sans-serif; font-size:20px; color: var(--title-color); }
+.sub { font-size:12px; color:#6b7280; }
 
-/* left area for logo */
-.headerLeft {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-}
-
-/* center area for title */
-.headerCenter {
-  flex: 1 1 auto;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-/* tiny empty area to balance layout on the right */
-.headerRight {
-  flex: 0 0 48px;
-}
-
-/* logo */
-.logo {
-  height: 48px;
-  width: auto;
-  object-fit: contain;
-}
-
-/* title uses self-hosted font and color */
-.title {
-  color: var(--title-color);
-  font-size: 28px;
-  font-family: "Original Surfer", "Brush Script MT", cursive;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-}
-.sub {
-  font-size: 12px;
-  color: #475569;
-}
-
-/* grid */
 .grid {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
-
-/* cell */
 .cell {
-  background: white;
-  border: 1px solid #f0f3f6;
-  padding: 6px;
-  min-height: 90px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height: 72px;
 }
+.centered { text-align:center; }
+.problemText { font-size:18px; color:#0f172a; }
 
-/* vertical layout */
-.vertical {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-.topNumber {
-  font-size: 20px;
-  font-weight: 700;
-  padding-right: 6px;
-}
-.bottomRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  padding-right: 6px;
-  font-size: 20px;
-}
-.times {
-  transform: translateY(3px);
-  font-size: 16px;
-}
-.bottomNumber { font-weight:700; }
-
-/* bold line and write area under the line */
-.line {
-  border-top: 3px solid #222;
-  margin-top: 8px;
-}
-.writeArea {
-  height: 24px;
-  margin-top: 6px;
-}
-
-/* empty placeholder */
-.empty { opacity: 0.25; font-size: 12px; padding: 6px; }
-
-/* answer key printed on separate page */
-.answerPage {
-  margin-top: 18px;
-  page-break-before: always;
-}
-.answerPage h2 { margin: 0 0 8px 0; }
-.answerList {
-  columns: 3;
-  padding-left: 20px;
-  margin: 0;
-}
-.answerText { color: #333; }
-.answerValue { color: #c9184a; font-weight: 700; } /* red answers */
-
-/* footer */
-.footer {
-  margin-top: 8px;
-  text-align: center;
-  color: #6b7280;
-  font-size: 12px;
-}
-
-/* print tweaks */
-@media print {
-  .sheet {
-    box-shadow: none;
-    border-radius: 0;
-    padding: 6mm;
-  }
-  .grid { gap: 6px; }
-  .cell { min-height: 76px; padding: 6px; }
-  .answerList { columns: 4; }
-}
+.answerPage { page-break-before: always; margin-top: 18px; }
+.answerList { columns: 2; }
+.answerText { font-size: 14px; }
+.answerValue { font-weight: 700; }
+.footer { margin-top: 18px; text-align:center; color:#6b7280; }

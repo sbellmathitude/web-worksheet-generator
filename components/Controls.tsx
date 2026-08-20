@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { PracticeMode } from "../lib/generator";
 
 type Props = {
@@ -15,220 +15,105 @@ type Props = {
 };
 
 export const Controls: React.FC<Props> = ({ onGenerate }) => {
-  const [mode, setMode] = useState<PracticeMode>("full");
-  const [fixedMultiplier, setFixedMultiplier] = useState<number>(2);
-  const [rangeMin, setRangeMin] = useState<number>(2);
-  const [rangeMax, setRangeMax] = useState<number>(9);
-  const [cols, setCols] = useState<number>(10);
-  const [rows, setRows] = useState<number>(10);
+  const [activity, setActivity] = useState<"pdf" | "interactive">("pdf");
+  const [spec, setSpec] = useState<string>("range:0-9");
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
 
+  // all activities are 10x10
+  const cols = 10;
+  const rows = 10;
   const count = cols * rows;
 
-  useEffect(() => {
-    if (mode === "limited") {
-      setRangeMin(2);
-      setRangeMax(5);
-    } else if (mode === "full" || mode === "interactive") {
-      setRangeMin(2);
-      setRangeMax(9);
-    }
-  }, [mode]);
-
-  function applyPreset(preset: string) {
-    if (preset === "3x30") {
-      setMode("single");
-      setFixedMultiplier(3);
-      setCols(5);
-      setRows(6);
-    } else if (preset === "10x10") {
-      setMode("full");
-      setCols(10);
-      setRows(10);
-    } else if (preset === "interactive-10x10") {
-      setMode("interactive");
-      setCols(10);
-      setRows(10);
+  function handleGenerate() {
+    // interpret spec
+    if (spec.startsWith("single:")) {
+      const m = Number(spec.split(":")[1]);
+      onGenerate({
+        mode: "single",
+        fixedMultiplier: m,
+        count,
+        includeAnswers,
+        cols,
+        rows
+      });
+    } else if (spec.startsWith("range:")) {
+      const parts = spec.split(":")[1].split("-");
+      const min = Number(parts[0]);
+      const max = Number(parts[1]);
+      onGenerate({
+        mode: "full",
+        rangeMin: min,
+        rangeMax: max,
+        count,
+        includeAnswers,
+        cols,
+        rows
+      });
+    } else {
+      // fallback
+      onGenerate({ mode: "full", count, includeAnswers, cols, rows });
     }
   }
 
   return (
-    <div>
-      {/* Quick help / presets */}
-      <div style={{ marginBottom: 12, background: "#fff", padding: 12, borderRadius: 8 }}>
-        <strong>Quick help</strong>
-        <p style={{ margin: "8px 0" }}>
-          Choose a practice mode, set columns/rows (Total shown on the right), then click "Generate Worksheet".
-          You can also switch to <em>Interactive</em> mode to practice live with instant feedback and animations.
-        </p>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn" onClick={() => applyPreset("3x30")}>3× (30)</button>
-          <button className="btn" onClick={() => applyPreset("10x10")}>10×10 Worksheet</button>
-          <button className="btn" onClick={() => applyPreset("interactive-10x10")}>Interactive 10×10</button>
-        </div>
-        <details style={{ marginTop: 8 }}>
-          <summary style={{ cursor: "pointer" }}>How it works</summary>
-          <ol>
-            <li>Select a mode (Single / Limited / Full / Interactive).</li>
-            <li>Choose columns and rows. Total cells = columns × rows.</li>
-            <li>Click Generate. Printable worksheets appear in the main panel; Interactive mode opens live inputs with animations.</li>
-          </ol>
-        </details>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          className="btn"
+          onClick={() => setActivity("pdf")}
+          style={{
+            flex: 1,
+            fontWeight: 700,
+            background: activity === "pdf" ? "linear-gradient(90deg,#60a5fa,#7c3aed)" : "white",
+            color: activity === "pdf" ? "white" : "#111827",
+            border: activity === "pdf" ? "none" : "1px solid #d1d5db"
+          }}
+        >
+          PDF
+        </button>
+        <button
+          className="btn"
+          onClick={() => setActivity("interactive")}
+          style={{
+            flex: 1,
+            fontWeight: 700,
+            background: activity === "interactive" ? "linear-gradient(90deg,#f97316,#f43f5e)" : "white",
+            color: activity === "interactive" ? "white" : "#111827",
+            border: activity === "interactive" ? "none" : "1px solid #d1d5db"
+          }}
+        >
+          Interactive
+        </button>
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onGenerate({
-            mode,
-            fixedMultiplier: mode === "single" ? fixedMultiplier : undefined,
-            rangeMin: mode !== "single" ? rangeMin : undefined,
-            rangeMax: mode !== "single" ? rangeMax : undefined,
-            count,
-            includeAnswers,
-            cols,
-            rows
-          });
-        }}
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
-      >
-        <fieldset style={{ border: "none", padding: 0 }}>
-          <legend style={{ fontWeight: 700 }}>Practice type</legend>
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <label style={{ fontSize: 13, minWidth: 72 }}>Problem set</label>
+        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ flex: 1 }}>
+          {/* single multiplier options */}
+          {Array.from({ length: 10 }).map((_, i) => (
+            <option key={`s${i}`} value={`single:${i}`}>Single: {i}</option>
+          ))}
+          <option value="range:0-4">Range: 0–4</option>
+          <option value="range:2-9">Range: 2–9</option>
+          <option value="range:0-9">Range: 0–9</option>
+        </select>
+      </div>
 
-          <label style={{ display: "block", marginTop: 6 }}>
-            <input
-              type="radio"
-              name="mode"
-              value="single"
-              checked={mode === "single"}
-              onChange={() => setMode("single")}
-            />{' '}
-            Single fact (one multiplier)
-          </label>
-
-          {mode === "single" && (
-            <div style={{ marginLeft: 18, marginTop: 6 }}>
-              <label>
-                Multiplier:
-                <select
-                  value={fixedMultiplier}
-                  onChange={(e) => setFixedMultiplier(Number(e.target.value))}
-                  style={{ marginLeft: 8 }}
-                >
-                  {Array.from({ length: 8 }, (_, i) => i + 2).map((n) => (
-                    <option key={n} value={n}>
-                      {n}s
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          )}
-
-          <label style={{ display: "block", marginTop: 10 }}>
-            <input
-              type="radio"
-              name="mode"
-              value="limited"
-              checked={mode === "limited"}
-              onChange={() => setMode("limited")}
-            />{' '}
-            Limited mixed (smaller range)
-          </label>
-
-          {mode === "limited" && (
-            <div style={{ marginLeft: 18, marginTop: 6 }}>
-              <label>
-                Range:
-                <input
-                  type="number"
-                  value={rangeMin}
-                  min={2}
-                  max={20}
-                  onChange={(e) => setRangeMin(Number(e.target.value))}
-                  style={{ width: 60, marginLeft: 8 }}
-                />
-                {' — '}
-                <input
-                  type="number"
-                  value={rangeMax}
-                  min={2}
-                  max={20}
-                  onChange={(e) => setRangeMax(Number(e.target.value))}
-                  style={{ width: 60, marginLeft: 8 }}
-                />
-              </label>
-            </div>
-          )}
-
-          <label style={{ display: "block", marginTop: 10 }}>
-            <input
-              type="radio"
-              name="mode"
-              value="full"
-              checked={mode === "full"}
-              onChange={() => setMode("full")}
-            />{' '}
-            Full mixed single-digit (2–9)
-          </label>
-
-          <label style={{ display: "block", marginTop: 10 }}>
-            <input
-              type="radio"
-              name="mode"
-              value="interactive"
-              checked={mode === "interactive"}
-              onChange={() => setMode("interactive")}
-            />{' '}
-            Interactive (live practice with animations)
-          </label>
-        </fieldset>
-
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <label style={{ display: "flex", flexDirection: "column" }}>
-            Columns
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={cols}
-              onChange={(e) => setCols(Number(e.target.value))}
-              style={{ width: 80 }}
-            />
-          </label>
-
-          <label style={{ display: "flex", flexDirection: "column" }}>
-            Rows
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={rows}
-              onChange={(e) => setRows(Number(e.target.value))}
-              style={{ width: 80 }}
-            />
-          </label>
-
-          <div style={{ marginLeft: "auto", fontSize: 13, color: "#475569" }}>
-            Total: <strong>{count}</strong>
-          </div>
-        </div>
-
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input
-            type="checkbox"
-            checked={includeAnswers}
-            onChange={(e) => setIncludeAnswers(e.target.checked)}
-          />
-          Include answer key
+      {activity === "pdf" && (
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+          <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} /> Include answer key
         </label>
+      )}
 
-        <div style={{ display: "flex", gap: 8 }}>
-          <button type="submit" className="btn" style={{ padding: "8px 12px" }}>
-            Generate Worksheet
-          </button>
-        </div>
-      </form>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          onClick={handleGenerate}
+          className="btn"
+          style={{ padding: "8px 12px", flex: 1 }}
+        >
+          Generate {activity === "interactive" ? "Interactive" : "PDF"}
+        </button>
+      </div>
     </div>
   );
 };

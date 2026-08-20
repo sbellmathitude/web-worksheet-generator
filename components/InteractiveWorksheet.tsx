@@ -1,48 +1,144 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Problem } from '../lib/generator';
 
-export default function InteractiveWorksheet({ problems }: { problems: Problem[] }) {
+export default function InteractiveWorksheet({ problems, cols = 10 }: { problems: Problem[]; cols?: number }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [correct, setCorrect] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  function handleChange(id: string, val: string, a: number, b: number) {
+  function spawnConfetti(xPerc: number, yPerc: number) {
+    const container = containerRef.current;
+    if (!container) return;
+    const colors = ['#f97316', '#60a5fa', '#f43f5e', '#34d399', '#f59e0b', '#a78bfa'];
+
+    for (let i = 0; i < 24; i++) {
+      const el = document.createElement('span');
+      el.className = 'confetti';
+      const size = Math.floor(Math.random() * 8) + 6; // 6-14px
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width = `${size}px`;
+      el.style.height = `${size * 0.6}px`;
+      el.style.left = `calc(${xPerc}% + ${Math.random() * 20 - 10}px)`;
+      el.style.top = `calc(${yPerc}% + ${Math.random() * 20 - 10}px)`;
+      el.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+      container.appendChild(el);
+
+      // remove after animation
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  function handleChange(id: string, val: string, a: number, b: number, index: number) {
     setAnswers((prev) => ({ ...prev, [id]: val }));
     const numeric = Number(val);
-    if (!Number.isNaN(numeric) && numeric === a * b) {
+    if (!Number.isNaN(numeric) && numeric === a * b && !correct[id]) {
       setCorrect((prev) => ({ ...prev, [id]: true }));
-      // small visual feedback handled by CSS class for .correct
+      // spawn confetti near the cell
+      const el = document.getElementById(id);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const parentRect = containerRef.current!.getBoundingClientRect();
+        const x = ((rect.left - parentRect.left) / parentRect.width) * 100;
+        const y = ((rect.top - parentRect.top) / parentRect.height) * 100;
+        spawnConfetti(x, y);
+      } else {
+        spawnConfetti(50, 20);
+      }
     }
   }
 
   const score = Object.values(correct).filter(Boolean).length;
 
+  // compute column color families (ten columns)
+  function columnColor(colIndex: number) {
+    // use HSL across hue spectrum but keep within one family by hue per column
+    const hue = Math.round((colIndex / cols) * 360);
+    return `linear-gradient(180deg, hsl(${hue} 90% 65%) 0%, hsl(${hue} 85% 55%) 100%)`;
+  }
+
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
+      <div ref={containerRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }} />
+
       <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: 14 }}>Interactive practice — score: <strong>{score}/{problems.length}</strong></div>
-        <div style={{ fontSize: 12, color: '#6b7280' }}>Type answers; correct answers animate green.</div>
+        <div style={{ fontSize: 12, color: '#6b7280' }}>Click a cell or its input to select it. Correct answers fill the cell with color.</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(10, 1fr)`, gap: 8 }}>
-        {problems.map((p) => (
-          <div key={p.id} className={`problem ${correct[p.id] ? 'correct' : ''}`}>
-            <div className="problem-label">{p.a} × {p.b}</div>
-            <input
-              value={answers[p.id] ?? ''}
-              onChange={(e) => handleChange(p.id, e.target.value, p.a, p.b)}
-              style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }}
-              inputMode="numeric"
-            />
-            {correct[p.id] && <div className="check">✓</div>}
-          </div>
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 8 }}>
+        {problems.map((p, idx) => {
+          const col = idx % cols;
+          const bg = columnColor(col);
+          const isSelected = selected === p.id;
+          const isCorrect = !!correct[p.id];
+
+          return (
+            <div
+              key={p.id}
+              id={p.id}
+              className={`problem ${isCorrect ? 'correct' : ''} ${isSelected ? 'selected' : ''}`}
+              style={{ background: isCorrect ? undefined : undefined }}
+              onClick={() => setSelected(p.id)}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%'
+                }}
+              >
+                <div
+                  className="problemBox"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 8,
+                    boxSizing: 'border-box',
+                    borderRadius: 8,
+                    background: isCorrect ? bg : (isSelected ? 'rgba(0,0,0,0.06)' : 'transparent')
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div className="problemText" style={{ color: isCorrect ? 'white' : '#111827', fontWeight: isSelected ? 700 : 600 }}>{p.a} × {p.b} =</div>
+                    <input
+                      value={answers[p.id] ?? ''}
+                      onChange={(e) => handleChange(p.id, e.target.value, p.a, p.b, idx)}
+                      onFocus={() => setSelected(p.id)}
+                      style={{ marginTop: 8, width: 64, padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e7eb', background: 'white' }}
+                      inputMode="numeric"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <style jsx>{`
-        .problem { padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: white; position: relative; transition: transform .18s ease, box-shadow .18s ease; }
-        .problem.correct { transform: scale(1.04); box-shadow: 0 8px 24px rgba(16,24,40,0.08); border-color: #bbf7d0; }
-        .check { position: absolute; top: 8px; right: 8px; color: #10b981; font-weight: 700; }
-        .problem-label { font-weight: 600; margin-bottom: 6px; }
+        .problem { padding: 0; border-radius: 8px; background: white; transition: transform .18s ease, box-shadow .18s ease; min-height: 64px; }
+        .problem.selected { outline: 3px solid rgba(99,102,241,0.12); }
+        .problem.correct { transform: scale(1.02); box-shadow: 0 10px 30px rgba(16,24,40,0.12); }
+        .problem.correct .problemBox { background: var(--col-bg); }
+        .problemText { font-size: 16px; }
+
+        /* confetti */
+        .confetti { position: absolute; border-radius: 3px; opacity: 0.95; transform-origin: center; animation: confettiFall 900ms linear forwards; z-index: 9999; }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0) scale(1); opacity: 1; } 100% { transform: translateY(160px) rotate(720deg) scale(0.85); opacity: 0; } }
+      `}</style>
+
+      <style jsx global>{`
+        /* apply column color background for correct cells using inline style via CSS variable */
+        .problem.correct { background: transparent; }
+        .problem.correct .problemBox { /* background set inline when rendering via style */ }
       `}</style>
     </div>
   );
