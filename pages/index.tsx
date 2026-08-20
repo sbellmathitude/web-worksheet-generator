@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { Controls } from "../components/Controls";
 import { Worksheet } from "../components/Worksheet";
+import InteractiveWorksheet from "../components/InteractiveWorksheet";
 import { generateProblems, PracticeMode, Problem } from "../lib/generator";
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
   const [cols, setCols] = useState<number>(10);
   const [rows, setRows] = useState<number>(10);
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
+  const [mode, setMode] = useState<PracticeMode>("full");
 
   function handleGenerate(opts: {
     mode: PracticeMode;
@@ -20,13 +22,14 @@ export default function Home() {
     cols: number;
     rows: number;
   }) {
-    const { mode, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
+    const { mode: m, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
     setCols(cols);
     setRows(rows);
     setIncludeAnswers(includeAnswers);
+    setMode(m);
 
     let generated = generateProblems({
-      mode,
+      mode: m,
       count,
       fixedMultiplier,
       rangeMin,
@@ -49,9 +52,12 @@ export default function Home() {
 
       <main className="container">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 20 }}>MQ Multiplication — Worksheet Generator</h1>
-            <div style={{ color: "#6b7280", fontSize: 13 }}>Printable worksheets: Calculation Corner</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img src="/images/logo.png" alt="MQ logo" style={{ height: 48, width: 'auto' }} />
+            <div>
+              <h1 style={{ margin: 0, fontSize: 20 }}>MQ Multiplication — Worksheet Generator</h1>
+              <div style={{ color: "#6b7280", fontSize: 13 }}>Printable worksheets: Calculation Corner</div>
+            </div>
           </div>
 
           <div className="no-print" style={{ display: "flex", gap: 8 }}>
@@ -78,7 +84,11 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <Worksheet problems={problems} cols={cols} rows={rows} includeAnswers={includeAnswers} />
+              mode === 'interactive' ? (
+                <InteractiveWorksheet problems={problems} />
+              ) : (
+                <Worksheet problems={problems} cols={cols} rows={rows} includeAnswers={includeAnswers} />
+              )
             )}
           </div>
         </div>

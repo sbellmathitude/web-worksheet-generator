@@ -5,7 +5,7 @@ export type Problem = {
   answer: number;
 };
 
-export type PracticeMode = "single" | "limited" | "full";
+export type PracticeMode = "single" | "limited" | "full" | "interactive";
 
 export function generateProblems(opts: {
   mode: PracticeMode;
@@ -57,7 +57,7 @@ export function generateProblems(opts: {
   if (mode === "limited") {
     rangeMin = opts.rangeMin ?? 2;
     rangeMax = opts.rangeMax ?? 5;
-  } else if (mode === "full") {
+  } else if (mode === "full" || mode === "interactive") {
     rangeMin = opts.rangeMin ?? 2;
     rangeMax = opts.rangeMax ?? 9;
   }
