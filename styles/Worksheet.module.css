@@ -20,26 +20,26 @@
   display: grid;
   gap: 10px;
 }
-/* default .cell used for on-screen preview; keep subtle border for visual separation */
+/* remove boxes around problems entirely */
 .cell {
-  border: 1px solid #eef2f7;
-  border-radius: 8px;
-  background: #fff;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   display:flex;
   align-items:center;
   justify-content:center;
   min-height: 82px;
-  padding: 8px;
+  padding: 8px 0;
   box-sizing: border-box;
 }
 .centered { text-align:center; }
-.problemText { font-size:18px; color:#0f172a; }
+.problemText { font-size:18px; color:#0f172a; font-weight:400; }
 
 /* vertical layout for PDF cells (traditional worksheet style) */
 .vertical { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.topNumber { font-size:20px; font-weight:700; }
-.mulLine { font-size:18px; font-weight:600; color:#0f172a; }
-.line { width:60%; height:1px; background:#e6eef6; margin-top:6px; }
+.topNumber { font-size:20px; font-weight:400; }
+.mulLine { font-size:18px; font-weight:400; color:#0f172a; }
+.line { width:60%; height:2px; background:#2563eb; margin-top:6px; }
 .writeArea { height:18px; display:flex; align-items:center; justify-content:center; }
 
 .answerPage { page-break-before: always; margin-top: 18px; }
@@ -68,7 +68,7 @@
   .mulLine { font-size: 18px; font-weight: 400; color: #0f172a; }
 
   /* Make the separation line darker for writing so students see where to write */
-  .line { width: 70%; height: 1px; background: #9fc9ff; margin-top: 6px; }
+  .line { width: 70%; height: 2px; background: #1e40af; margin-top: 6px; }
 
   /* Clear write area to leave space to write answers */
   .writeArea { height: 26px; }

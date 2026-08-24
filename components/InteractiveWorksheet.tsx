@@ -12,10 +12,10 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
     if (!container) return;
     const colors = ['#f97316', '#60a5fa', '#f43f5e', '#34d399', '#f59e0b', '#a78bfa'];
 
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 20; i++) {
       const el = document.createElement('span');
       el.className = 'confetti';
-      const size = Math.floor(Math.random() * 8) + 6; // 6-14px
+      const size = Math.floor(Math.random() * 10) + 6; // 6-16px
       el.style.background = colors[Math.floor(Math.random() * colors.length)];
       el.style.width = `${size}px`;
       el.style.height = `${size * 0.6}px`;
@@ -55,7 +55,8 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
   function columnColor(colIndex: number) {
     // use HSL across hue spectrum but keep within one family by hue per column
     const hue = Math.round((colIndex / cols) * 360);
-    return `linear-gradient(180deg, hsl(${hue} 90% 65%) 0%, hsl(${hue} 85% 55%) 100%)`;
+    // return a pair of colors for gradient
+    return `linear-gradient(180deg, hsl(${hue} 90% 60%) 0%, hsl(${hue} 85% 45%) 100%)`;
   }
 
   return (
@@ -64,7 +65,7 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
 
       <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: 14 }}>Interactive practice — score: <strong>{score}/{problems.length}</strong></div>
-        <div style={{ fontSize: 12, color: '#6b7280' }}>Click a cell or its input to select it. Correct answers fill the cell with color.</div>
+        <div style={{ fontSize: 12, color: '#6b7280' }}>Click a cell to select it. Correct answers fill the cell with color; input stays white.</div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 8 }}>
@@ -79,42 +80,21 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
               key={p.id}
               id={p.id}
               className={`problem ${isCorrect ? 'correct' : ''} ${isSelected ? 'selected' : ''}`}
-              style={{ background: isCorrect ? undefined : undefined }}
               onClick={() => setSelected(p.id)}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%'
-                }}
-              >
-                <div
-                  className="problemBox"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 8,
-                    boxSizing: 'border-box',
-                    borderRadius: 8,
-                    background: isCorrect ? bg : (isSelected ? 'rgba(0,0,0,0.06)' : 'transparent')
-                  }}
-                >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8, height: '100%' }}>
+                <div className="problemBox" style={{ width: '100%', padding: 8, borderRadius: 8, background: isCorrect ? bg : (isSelected ? 'rgba(0,0,0,0.04)' : 'transparent'), boxSizing: 'border-box' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div className="problemText" style={{ color: isCorrect ? 'white' : '#111827', fontWeight: isSelected ? 700 : 600 }}>{p.a} × {p.b} =</div>
-                    <input
-                      value={answers[p.id] ?? ''}
-                      onChange={(e) => handleChange(p.id, e.target.value, p.a, p.b, idx)}
-                      onFocus={() => setSelected(p.id)}
-                      style={{ marginTop: 8, width: 64, padding: '6px 8px', borderRadius: 6, border: '1px solid #e5e7eb', background: 'white' }}
-                      inputMode="numeric"
-                    />
+                    <div className="problemText" style={{ color: isCorrect ? 'white' : '#111827', fontWeight: isSelected ? 700 : 400, fontSize: 16 }}>{p.a} × {p.b} =</div>
+                    <div style={{ marginTop: 8 }}>
+                      <input
+                        value={answers[p.id] ?? ''}
+                        onChange={(e) => handleChange(p.id, e.target.value, p.a, p.b, idx)}
+                        onFocus={() => setSelected(p.id)}
+                        style={{ width: 88, padding: '8px 10px', borderRadius: 6, border: '2px solid rgba(0,0,0,0.08)', background: 'white', color: '#111827', fontSize: 14 }}
+                        inputMode="numeric"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -124,21 +104,15 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
       </div>
 
       <style jsx>{`
-        .problem { padding: 0; border-radius: 8px; background: white; transition: transform .18s ease, box-shadow .18s ease; min-height: 64px; }
+        .problem { padding: 0; border-radius: 8px; background: transparent; transition: transform .18s ease, box-shadow .18s ease; min-height: 84px; }
         .problem.selected { outline: 3px solid rgba(99,102,241,0.12); }
         .problem.correct { transform: scale(1.02); box-shadow: 0 10px 30px rgba(16,24,40,0.12); }
-        .problem.correct .problemBox { background: var(--col-bg); }
+        .problem.correct .problemBox { /* background set inline */ }
         .problemText { font-size: 16px; }
 
         /* confetti */
         .confetti { position: absolute; border-radius: 3px; opacity: 0.95; transform-origin: center; animation: confettiFall 900ms linear forwards; z-index: 9999; }
         @keyframes confettiFall { 0% { transform: translateY(0) rotate(0) scale(1); opacity: 1; } 100% { transform: translateY(160px) rotate(720deg) scale(0.85); opacity: 0; } }
-      `}</style>
-
-      <style jsx global>{`
-        /* apply column color background for correct cells using inline style via CSS variable */
-        .problem.correct { background: transparent; }
-        .problem.correct .problemBox { /* background set inline when rendering via style */ }
       `}</style>
     </div>
   );
