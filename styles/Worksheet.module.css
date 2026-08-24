@@ -11,7 +11,7 @@
   margin-bottom: 12px;
 }
 .headerLeft { display:flex; align-items:center; }
-.logo { height:40px; width:auto; margin-right:12px; }
+.logo { height:48px; width:auto; margin-right:12px; }
 .headerCenter { text-align:center; flex:1; }
 .title { font-family: 'Original Surfer', sans-serif; font-size:20px; color: var(--title-color); }
 .sub { font-size:12px; color:#6b7280; }
@@ -20,6 +20,7 @@
   display: grid;
   gap: 10px;
 }
+/* default .cell used for on-screen preview; keep subtle border for visual separation */
 .cell {
   border: 1px solid #eef2f7;
   border-radius: 8px;
@@ -27,13 +28,57 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height: 72px;
+  min-height: 82px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 .centered { text-align:center; }
 .problemText { font-size:18px; color:#0f172a; }
+
+/* vertical layout for PDF cells (traditional worksheet style) */
+.vertical { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.topNumber { font-size:20px; font-weight:700; }
+.bottomRow { display:flex; align-items:center; gap:6px; }
+.times { font-size:16px; }
+.bottomNumber { font-size:18px; font-weight:600; }
+.line { width:60%; height:1px; background:#e6eef6; margin-top:6px; }
+.writeArea { height:18px; }
 
 .answerPage { page-break-before: always; margin-top: 18px; }
 .answerList { columns: 2; }
 .answerText { font-size: 14px; }
 .answerValue { font-weight: 700; }
 .footer { margin-top: 18px; text-align:center; color:#6b7280; }
+
+/* Print-specific adjustments: remove boxes around problems, ensure vertical layout, and size logo to 1in */
+@media print {
+  /* sheet background and padding are ignored by many printers; keep spacing minimal */
+  .sheet { background: white; padding: 12px; border-radius: 0; }
+
+  /* Logo prints at 1 inch high */
+  .logo { height: 1in !important; width: auto; margin-right: 12px; }
+
+  /* Make the grid tighter for print but keep cells readable */
+  .grid { gap: 6px; }
+
+  /* Remove visual boxes around each problem for a clean worksheet look */
+  .cell { border: none !important; background: transparent !important; box-shadow: none !important; min-height: 60px; padding: 6px 0; }
+
+  /* Center the vertical stack and make the numbers easy to read on paper */
+  .vertical { align-items: center; gap: 6px; }
+  .topNumber { font-size: 20px; font-weight: 700; color: #0f172a; }
+  .bottomRow { gap: 4px; }
+  .bottomNumber { font-size: 18px; font-weight: 600; }
+
+  /* Make the separation line darker for writing so students see where to write */
+  .line { width: 70%; height: 1px; background: #9fc9ff; margin-top: 6px; }
+
+  /* Clear write area to leave space to write answers */
+  .writeArea { height: 26px; }
+
+  /* Ensure NO bold text in printed worksheet */
+  .topNumber, .bottomNumber, .problemText { font-weight: 400 !important; }
+
+  /* Avoid printing any interactive-only visuals */
+  .no-print { display: none !important; }
+}
