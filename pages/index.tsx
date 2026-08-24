@@ -51,7 +51,7 @@ export default function Home() {
       </Head>
 
       <main className="container">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <img src="/images/logo.png" alt="MQ logo" style={{ height: 48, width: 'auto' }} />
             <div>
@@ -60,7 +60,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="no-print" style={{ display: "flex", gap: 8 }}>
+          {/* Controls moved into header to free horizontal space */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="no-print">
+            <Controls onGenerate={handleGenerate} />
             <button
               onClick={() => window.print()}
               className="btn"
@@ -71,11 +73,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
-          <div style={{ width: 340 }} className="no-print">
-            <Controls onGenerate={handleGenerate} />
-          </div>
-
+        <div style={{ display: "block" }}>
           <div style={{ flex: 1 }} id="worksheet">
             {problems.length === 0 ? (
               <div style={{ padding: 28, background: "white", borderRadius: 8 }}>

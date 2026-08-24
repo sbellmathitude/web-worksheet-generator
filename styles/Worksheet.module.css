@@ -38,12 +38,12 @@
 /* vertical layout for PDF cells (traditional worksheet style)
    Use a small two-column grid so numbers align to the right column ensuring ones digits stack */
 .vertical { display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; }
-.rowGrid { width:80%; display:grid; grid-template-columns: 26px 1fr; align-items:center; }
+.rowGrid { width:80%; margin-left: auto; display:grid; grid-template-columns: 26px 1fr; align-items:center; }
 .leftCell { width:26px; }
 .topNumber { font-size:20px; font-weight:400; text-align:right; }
 .times { font-size:18px; font-weight:400; text-align:left; }
 .bottomNumber { font-size:20px; font-weight:400; text-align:right; }
-.line { width:60%; height:2px; background:#000000; margin-top:6px; }
+.line { width:80%; margin-left: auto; height:2px; background:#000000; margin-top:6px; }
 .writeArea { height:18px; display:flex; align-items:center; justify-content:center; }
 
 .answerPage { page-break-before: always; margin-top: 18px; }
@@ -68,13 +68,13 @@
 
   /* Center the vertical stack and make the numbers easy to read on paper */
   .vertical { align-items: center; gap: 6px; }
-  .rowGrid { width:80%; grid-template-columns: 26px 1fr; }
+  .rowGrid { width:80%; margin-left: auto; grid-template-columns: 26px 1fr; }
   .topNumber { font-size: 20px; font-weight: 400; color: #0f172a; text-align:right; }
   .mulLine { font-size: 18px; font-weight: 400; color: #0f172a; }
   .bottomNumber { font-size: 20px; font-weight: 400; text-align:right; }
 
   /* Make the separation line darker for writing so students see where to write */
-  .line { width: 70%; height: 2px; background: #000000; margin-top: 6px; }
+  .line { width: 80%; margin-left: auto; height: 2px; background: #000000; margin-top: 6px; }
 
   /* Clear write area to leave space to write answers */
   .writeArea { height: 26px; }
