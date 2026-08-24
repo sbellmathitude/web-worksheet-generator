@@ -38,9 +38,7 @@
 /* vertical layout for PDF cells (traditional worksheet style) */
 .vertical { display:flex; flex-direction:column; align-items:center; gap:6px; }
 .topNumber { font-size:20px; font-weight:700; }
-.bottomRow { display:flex; align-items:center; gap:6px; }
-.times { font-size:16px; }
-.bottomNumber { font-size:18px; font-weight:600; }
+.mulLine { font-size:18px; font-weight:600; color:#0f172a; }
 .line { width:60%; height:1px; background:#e6eef6; margin-top:6px; }
 .writeArea { height:18px; display:flex; align-items:center; justify-content:center; }
 
@@ -67,8 +65,7 @@
   /* Center the vertical stack and make the numbers easy to read on paper */
   .vertical { align-items: center; gap: 6px; }
   .topNumber { font-size: 20px; font-weight: 400; color: #0f172a; }
-  .bottomRow { gap: 4px; }
-  .bottomNumber { font-size: 18px; font-weight: 400; }
+  .mulLine { font-size: 18px; font-weight: 400; color: #0f172a; }
 
   /* Make the separation line darker for writing so students see where to write */
   .line { width: 70%; height: 1px; background: #9fc9ff; margin-top: 6px; }
@@ -77,7 +74,7 @@
   .writeArea { height: 26px; }
 
   /* Ensure NO bold text in printed worksheet */
-  .topNumber, .bottomNumber, .problemText { font-weight: 400 !important; }
+  .topNumber, .mulLine, .problemText { font-weight: 400 !important; }
 
   /* Avoid printing any interactive-only visuals */
   .no-print { display: none !important; }

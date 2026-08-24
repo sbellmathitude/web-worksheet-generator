@@ -35,11 +35,9 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
             <div key={i} className={styles.cell}>
               {p ? (
                 <div className={styles.vertical}>
-                  <div className={styles.topNumber}>{p.a}</div>
-                  <div className={styles.bottomRow}>
-                    <span className={styles.times}>×</span>
-                    <span className={styles.bottomNumber}>{p.b}</span>
-                  </div>
+                  <div className={styles.topNumber} aria-hidden>{p.a}</div>
+
+                  <div className={styles.mulLine} aria-hidden>× {p.b}</div>
 
                   <div className={styles.line} />
 
