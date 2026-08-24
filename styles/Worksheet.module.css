@@ -42,7 +42,7 @@
 .times { font-size:16px; }
 .bottomNumber { font-size:18px; font-weight:600; }
 .line { width:60%; height:1px; background:#e6eef6; margin-top:6px; }
-.writeArea { height:18px; }
+.writeArea { height:18px; display:flex; align-items:center; justify-content:center; }
 
 .answerPage { page-break-before: always; margin-top: 18px; }
 .answerList { columns: 2; }
@@ -59,16 +59,16 @@
   .logo { height: 1in !important; width: auto; margin-right: 12px; }
 
   /* Make the grid tighter for print but keep cells readable */
-  .grid { gap: 6px; }
+  .grid { gap: 6px; grid-auto-rows: minmax(56px, auto); }
 
   /* Remove visual boxes around each problem for a clean worksheet look */
   .cell { border: none !important; background: transparent !important; box-shadow: none !important; min-height: 60px; padding: 6px 0; }
 
   /* Center the vertical stack and make the numbers easy to read on paper */
   .vertical { align-items: center; gap: 6px; }
-  .topNumber { font-size: 20px; font-weight: 700; color: #0f172a; }
+  .topNumber { font-size: 20px; font-weight: 400; color: #0f172a; }
   .bottomRow { gap: 4px; }
-  .bottomNumber { font-size: 18px; font-weight: 600; }
+  .bottomNumber { font-size: 18px; font-weight: 400; }
 
   /* Make the separation line darker for writing so students see where to write */
   .line { width: 70%; height: 1px; background: #9fc9ff; margin-top: 6px; }
