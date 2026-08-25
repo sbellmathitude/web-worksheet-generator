@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PracticeMode } from "../lib/generator";
 
 type Props = {
@@ -12,9 +12,10 @@ type Props = {
     cols: number;
     rows: number;
   }) => void;
+  compact?: boolean;
 };
 
-export const Controls: React.FC<Props> = ({ onGenerate }) => {
+export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
   const [activity, setActivity] = useState<"pdf" | "interactive">("pdf");
   const [spec, setSpec] = useState<string>("range:0-9");
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
@@ -23,6 +24,11 @@ export const Controls: React.FC<Props> = ({ onGenerate }) => {
   const cols = 10;
   const rows = 10;
   const count = cols * rows;
+
+  useEffect(() => {
+    // ensure checkbox reset when switching to interactive
+    if (activity === "interactive") setIncludeAnswers(false);
+  }, [activity]);
 
   function handleGenerate() {
     // interpret spec
@@ -53,6 +59,62 @@ export const Controls: React.FC<Props> = ({ onGenerate }) => {
       // fallback
       onGenerate({ mode: "full", count, includeAnswers, cols, rows });
     }
+  }
+
+  if (compact) {
+    return (
+      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button
+            className="btn"
+            onClick={() => setActivity("pdf")}
+            style={{
+              fontWeight: 700,
+              padding: "8px 10px",
+              background: activity === "pdf" ? "linear-gradient(90deg,#60a5fa,#7c3aed)" : "white",
+              color: activity === "pdf" ? "white" : "#111827",
+              border: activity === "pdf" ? "none" : "1px solid #e6eef6",
+              borderRadius: 8
+            }}
+          >
+            PDF
+          </button>
+
+          <button
+            className="btn"
+            onClick={() => setActivity("interactive")}
+            style={{
+              fontWeight: 700,
+              padding: "8px 10px",
+              background: activity === "interactive" ? "linear-gradient(90deg,#f97316,#f43f5e)" : "white",
+              color: activity === "interactive" ? "white" : "#111827",
+              border: activity === "interactive" ? "none" : "1px solid #e6eef6",
+              borderRadius: 8
+            }}
+          >
+            Interactive
+          </button>
+        </div>
+
+        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e6eef6", minWidth: 140 }}>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <option key={`s${i}`} value={`single:${i}`}>Single: {i}</option>
+          ))}
+          <option value="range:0-4">Range: 0–4</option>
+          <option value="range:2-9">Range: 2–9</option>
+          <option value="range:0-9">Range: 0–9</option>
+        </select>
+
+        {activity === "pdf" && (
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} />
+            <span style={{ fontSize: 13 }}>answer key</span>
+          </label>
+        )}
+
+        <button onClick={handleGenerate} className="btn" style={{ padding: "8px 12px", background: "#10b981", color: "white", borderRadius: 8 }}>Generate</button>
+      </div>
+    );
   }
 
   return (
@@ -89,7 +151,6 @@ export const Controls: React.FC<Props> = ({ onGenerate }) => {
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <label style={{ fontSize: 13, minWidth: 72 }}>Problem set</label>
         <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ flex: 1 }}>
-          {/* single multiplier options */}
           {Array.from({ length: 10 }).map((_, i) => (
             <option key={`s${i}`} value={`single:${i}`}>Single: {i}</option>
           ))}
@@ -100,8 +161,9 @@ export const Controls: React.FC<Props> = ({ onGenerate }) => {
       </div>
 
       {activity === "pdf" && (
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-          <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} /> Include answer key
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} />
+          Include answer key
         </label>
       )}
 
