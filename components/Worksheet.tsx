@@ -16,15 +16,10 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
   return (
     <div className={styles.sheet}>
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <img src="/images/logo.png" alt="MQ logo" className={styles.logo} />
-        </div>
-
         <div className={styles.headerCenter}>
           <div className={styles.title}>Calculation Corner</div>
           <div className={styles.sub}>Practice your multiplication — show your work.</div>
         </div>
-
         <div className={styles.headerRight} aria-hidden />
       </div>
 
@@ -45,7 +40,10 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                     <div className={styles.bottomNumber}>{p.b}</div>
                   </div>
 
-                  <div className={styles.line} />
+                  <div className={styles.rowGrid} aria-hidden>
+                    <div className={styles.leftCell} />
+                    <div className={styles.line} />
+                  </div>
 
                   <div className={styles.writeArea}></div>
                 </div>
@@ -57,23 +55,49 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
         })}
       </div>
 
+      {/* Answer sheet: a second, more compact version with answers in red under each corresponding problem */}
       {includeAnswers && (
-        <div className={styles.answerPage}>
-          <h2>Answer Key</h2>
-          <ol className={styles.answerList}>
-            {filled.map((p, idx) => (
-              <li key={p.id}>
-                <span className={styles.answerText}>
-                  {p.a} × {p.b} = <span className={styles.answerValue}>{p.answer}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
+        <div className={styles.answerSheet}>
+          <div className={styles.answerHeader}>
+            <div className={styles.answerTitle}>Answer Key — Compact</div>
+          </div>
+
+          <div className={styles.gridCompact} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+            {Array.from({ length: total }).map((_, i) => {
+              const p = filled[i];
+              return (
+                <div key={`a-${i}`} className={styles.cellCompact}>
+                  {p ? (
+                    <div className={styles.verticalCompact}>
+                      <div className={styles.rowGridCompact} aria-hidden>
+                        <div className={styles.leftCell} />
+                        <div className={styles.topNumberCompact}>{p.a}</div>
+                      </div>
+
+                      <div className={styles.rowGridCompact} aria-hidden>
+                        <div className={styles.times}>×</div>
+                        <div className={styles.bottomNumberCompact}>{p.b}</div>
+                      </div>
+
+                      <div className={styles.lineCompact} />
+
+                      <div className={styles.answerValue} aria-hidden>{p.answer}</div>
+                    </div>
+                  ) : (
+                    <div className={styles.empty} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       <div className={styles.footer}>
-        <small>© Mathitude 2026</small>
+        <div className={styles.footerInner}>
+          <img src="/images/logo.png" alt="MQ logo" className={styles.footerLogo} />
+          <div className={styles.footerText}>Mathitude 2026</div>
+        </div>
       </div>
     </div>
   );

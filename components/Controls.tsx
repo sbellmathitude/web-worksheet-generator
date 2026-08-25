@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PracticeMode } from "../lib/generator";
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
 
 export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
   const [activity, setActivity] = useState<"pdf" | "interactive">("pdf");
-  const [spec, setSpec] = useState<string>("range:0-9");
+  const [spec, setSpec] = useState<string>("range:2-9");
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
 
   // all activities are 10x10
@@ -96,12 +96,15 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
           </button>
         </div>
 
-        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e6eef6", minWidth: 140 }}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <option key={`s${i}`} value={`single:${i}`}>Single: {i}</option>
-          ))}
-          <option value="range:0-4">Range: 0–4</option>
+        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e6eef6", minWidth: 160 }}>
+          {/* single multiplier options (2..9 only) */}
+          {Array.from({ length: 8 }).map((_, i) => {
+            const val = i + 2;
+            return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
+          })}
+
           <option value="range:2-9">Range: 2–9</option>
+          <option value="range:3-8">Range: 3–8</option>
           <option value="range:0-9">Range: 0–9</option>
         </select>
 
@@ -151,11 +154,14 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         <label style={{ fontSize: 13, minWidth: 72 }}>Problem set</label>
         <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ flex: 1 }}>
-          {Array.from({ length: 10 }).map((_, i) => (
-            <option key={`s${i}`} value={`single:${i}`}>Single: {i}</option>
-          ))}
-          <option value="range:0-4">Range: 0–4</option>
+          {/* single multiplier options (2..9) */}
+          {Array.from({ length: 8 }).map((_, i) => {
+            const val = i + 2;
+            return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
+          })}
+
           <option value="range:2-9">Range: 2–9</option>
+          <option value="range:3-8">Range: 3–8</option>
           <option value="range:0-9">Range: 0–9</option>
         </select>
       </div>

@@ -46,27 +46,23 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Calculation Corner — MQ Worksheet Generator</title>
+        <title>Mathitude Multiplication Worksheet Generator</title>
         <meta name="description" content="Printable multiplication worksheets (Calculation Corner)" />
       </Head>
 
       <main className="container">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src="/images/logo.png" alt="MQ logo" style={{ height: 48, width: 'auto' }} />
-            <div>
-              <h1 style={{ margin: 0, fontSize: 20 }}>MQ Multiplication — Worksheet Generator</h1>
-              <div style={{ color: "#6b7280", fontSize: 13 }}>Printable worksheets: Calculation Corner</div>
-            </div>
-          </div>
+        {/* Centered title */}
+        <div style={{ textAlign: "center", marginBottom: 10 }}>
+          <h1 style={{ margin: 0, fontSize: 22 }}>Mathitude Multiplication Worksheet Generator</h1>
+          <div style={{ color: "#6b7280", fontSize: 13, marginTop: 4 }}>Practice your multiplication — show your work.</div>
 
-          {/* Controls moved into header to free horizontal space */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="no-print">
-            <Controls onGenerate={handleGenerate} />
+          <div className="no-print" style={{ display: "flex", justifyContent: "center", marginTop: 10, gap: 12 }}>
+            <Controls compact onGenerate={handleGenerate} />
             <button
               onClick={() => window.print()}
               className="btn"
               title="Print current worksheet / save as PDF"
+              style={{ padding: "8px 12px", background: "#111827", color: "white", borderRadius: 8 }}
             >
               Print / Save PDF
             </button>

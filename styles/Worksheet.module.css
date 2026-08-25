@@ -1,5 +1,14 @@
 /* Worksheet styles adjusted to center content and make cells wider/square-like */
+
+/* Page size and single-page layout for print and preview */
+@page { size: letter landscape; margin: 0.5in; }
+
+/* Use Avenir Light for worksheet content where available, fallback to system sans */
+.sheet, .answerSheet { font-family: 'Avenir', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
+
 .sheet {
+  max-width: 11in;   /* letter width in landscape */
+  margin: 0 auto;
   background: white;
   padding: 18px;
   border-radius: 8px;
@@ -10,16 +19,12 @@
   justify-content: space-between;
   margin-bottom: 12px;
 }
-.headerLeft { display:flex; align-items:center; }
-.logo { height:48px; width:auto; margin-right:12px; }
 .headerCenter { text-align:center; flex:1; }
-.title { font-family: 'Original Surfer', sans-serif; font-size:20px; color: var(--title-color); }
+.title { font-family: 'Avenir', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-size:20px; color: var(--title-color); font-weight:400 }
 .sub { font-size:12px; color:#6b7280; }
 
-.grid {
-  display: grid;
-  gap: 10px;
-}
+.grid { display: grid; gap: 6px; }
+
 /* remove boxes around problems entirely */
 .cell {
   border: none;
@@ -28,8 +33,9 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height: 82px;
-  padding: 8px 0;
+  height: 0.64in;
+  min-height: 0.64in;
+  padding: 6px 0;
   box-sizing: border-box;
 }
 .centered { text-align:center; }
@@ -38,46 +44,66 @@
 /* vertical layout for PDF cells (traditional worksheet style)
    Use a small two-column grid so numbers align to the right column ensuring ones digits stack */
 .vertical { display:flex; flex-direction:column; align-items:center; gap:6px; width:100%; }
-.rowGrid { width:80%; margin-left: auto; display:grid; grid-template-columns: 26px 1fr; align-items:center; }
+.rowGrid { width:85%; margin-left: auto; display:grid; grid-template-columns: 26px 1fr; align-items:center; }
 .leftCell { width:26px; }
 .topNumber { font-size:20px; font-weight:400; text-align:right; }
 .times { font-size:18px; font-weight:400; text-align:left; }
 .bottomNumber { font-size:20px; font-weight:400; text-align:right; }
-.line { width:80%; margin-left: auto; height:2px; background:#000000; margin-top:6px; }
+.line { width:100%; height:2px; background:#000000; margin-top:6px; box-sizing:border-box }
 .writeArea { height:18px; display:flex; align-items:center; justify-content:center; }
+
+/* compact answer sheet styles */
+.answerSheet { margin-top: 18px; padding-top: 6px; }
+.answerHeader { text-align:left; margin-bottom: 6px; }
+.answerTitle { font-size:14px; font-weight:600; color:#0f172a; }
+.gridCompact { display:grid; gap:4px; }
+.cellCompact { height: 0.46in; min-height:0.46in; padding:4px 0; display:flex; align-items:center; justify-content:center; }
+.verticalCompact { display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; }
+.rowGridCompact { width:85%; margin-left:auto; display:grid; grid-template-columns: 20px 1fr; align-items:center; }
+.topNumberCompact, .bottomNumberCompact { font-size:16px; font-weight:400; text-align:right; }
+.lineCompact { width:100%; height:1px; background:#000; margin-top:4px; }
+.answerValue { color:#b91c1c; font-weight:600; margin-top:4px; }
 
 .answerPage { page-break-before: always; margin-top: 18px; }
 .answerList { columns: 2; }
 .answerText { font-size: 14px; }
-.answerValue { font-weight: 700; }
+.answerValueList { font-weight: 700; }
+
 .footer { margin-top: 18px; text-align:center; color:#6b7280; }
+.footerInner { background:#6d28d9; color:white; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:6px; }
+.footerLogo { height:20px; width:auto; }
+.footerText { font-weight:600; }
 
 /* Print-specific adjustments: remove boxes around problems, ensure vertical layout, and size logo to 1in */
 @media print {
   /* sheet background and padding are ignored by many printers; keep spacing minimal */
   .sheet { background: white; padding: 12px; border-radius: 0; }
 
-  /* Logo prints at 1 inch high */
-  .logo { height: 1in !important; width: auto; margin-right: 12px; }
+  /* Logo in footer prints at 0.25in high */
+  .footerLogo { height: 0.25in !important; width: auto; }
 
   /* Make the grid tighter for print but keep cells readable */
-  .grid { gap: 6px; grid-auto-rows: minmax(56px, auto); }
+  .grid { gap: 6px; grid-template-columns: repeat(10, 1fr); }
 
   /* Remove visual boxes around each problem for a clean worksheet look */
-  .cell { border: none !important; background: transparent !important; box-shadow: none !important; min-height: 60px; padding: 6px 0; }
+  .cell { border: none !important; background: transparent !important; box-shadow: none !important; min-height: 0.64in; padding: 4px 0; }
 
   /* Center the vertical stack and make the numbers easy to read on paper */
   .vertical { align-items: center; gap: 6px; }
-  .rowGrid { width:80%; margin-left: auto; grid-template-columns: 26px 1fr; }
+  .rowGrid { width:85%; margin-left: auto; grid-template-columns: 26px 1fr; }
   .topNumber { font-size: 20px; font-weight: 400; color: #0f172a; text-align:right; }
   .mulLine { font-size: 18px; font-weight: 400; color: #0f172a; }
   .bottomNumber { font-size: 20px; font-weight: 400; text-align:right; }
 
   /* Make the separation line darker for writing so students see where to write */
-  .line { width: 80%; margin-left: auto; height: 2px; background: #000000; margin-top: 6px; }
+  .line { width: 100%; height: 2px; background: #000000; margin-top: 6px; }
+
+  /* Compact answer sheet print tweaks */
+  .cellCompact { height:0.46in; min-height:0.46in; padding:3px 0 }
+  .lineCompact { height:1px; }
 
   /* Clear write area to leave space to write answers */
-  .writeArea { height: 26px; }
+  .writeArea { height: 0.26in; }
 
   /* Ensure NO bold text in printed worksheet */
   .topNumber, .bottomNumber, .problemText { font-weight: 400 !important; }
