@@ -1,85 +1,80 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+/* TIGHT-FIT PRINT FIX — drop-in replacement for the cell/print rules */
+@page { size: letter portrait; margin: 0.6in; }
 
-/* Worksheet styles adjusted to portrait layout and compact cells so 100 problems fit on one page */
+.sheet { max-width: 8.5in; padding: 10px; page-break-after: always; }
 
-/* Page size and portrait layout */
-@page { size: letter portrait; margin: 0.5in; }
+.grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
 
-/* Use Inter while Avenir is not available; font-display swap for consistency */
-.sheet, .answerSheet { font-family: 'Inter', 'Avenir', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif; font-weight: 300; }
-
-.sheet {
-  max-width: 8.5in;   /* letter width in portrait */
-  margin: 0 auto;
-  background: white;
-  padding: 12px;
-  border-radius: 6px;
-  page-break-after: always; /* ensure each sheet prints on its own page */
-}
-.header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
-.headerLeft { display:flex; align-items:center; gap:12px }
-.logoSmall { height:28px; width:auto }
-.headerCenter { text-align:center; flex:1 }
-.title { font-size:18px; color: #7030a0; font-weight:600; margin:0 }
-.sub { font-size:12px; color:#6b7280; margin-top:4px }
-
-/* Grid: 10 columns (compact) so 10x10 fits in portrait — numbers and write area are small but usable */
-.grid { display:grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
-
-/* Per-cell sizing: tuned for portrait single-page fit */
+/* Cells — keep 10 rows but safer spacing */
 .cell {
-  border: none;
-  background: transparent;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height: 0.58in; /* tuned to fit 10 rows on one page */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0.58in;          /* keep compact to fit 10 rows */
   min-height: 0.58in;
   padding: 4px 2px;
   box-sizing: border-box;
-  overflow: visible;
+  overflow: visible;       /* avoid clipping */
 }
 
-.vertical { display:flex; flex-direction:column; align-items:center; gap:4px; width:100% }
-.rowGrid { width:86%; margin-left:auto; display:grid; grid-template-columns: 18px 1fr; align-items:center }
-.leftCell { width:18px }
-.topNumber, .bottomNumber { font-size:14px; font-weight:400; text-align:right; line-height:1 }
-.times { font-size:14px; text-align:left; line-height:1; margin-right:4px }
-.line { width:100%; height:2px; background:#000; margin-top:4px; box-sizing:border-box }
-.writeArea { height: 0.18in; display:flex; align-items:center; justify-content:center }
+/* Vertical stack spacing */
+.vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
 
-/* Answer sheet compact styles */
-.answerSheet { margin-top:8px }
-.gridCompact { display:grid; grid-template-columns: repeat(10, 1fr); gap:4px }
-.cellCompact { height:0.38in; min-height:0.38in; padding:3px 2px; display:flex; align-items:center; justify-content:center }
-.verticalCompact { display:flex; flex-direction:column; align-items:center; gap:3px; width:100% }
-.rowGridCompact { width:86%; margin-left:auto; display:grid; grid-template-columns: 14px 1fr; align-items:center }
-.topNumberCompact, .bottomNumberCompact { font-size:12px; text-align:right; line-height:1 }
-.lineCompact { width:100%; height:1px; background:#000; margin-top:2px }
-.answerValue { color:#b91c1c; font-weight:600; margin-top:2px; font-size:12px }
+/* Narrow the sign column so × sits close to digits */
+.rowGrid {
+  width: 86%;
+  margin-left: auto;
+  display: grid;
+  grid-template-columns: 14px 1fr; /* 14px sign column brings × closer */
+  align-items: center;
+}
 
-/* Footer: only copyright in Surfer Purple */
-.footer { margin-top:8px; text-align:center }
-.footerText { color:#7030a0; font-weight:500; font-size:12px }
+/* Numbers: slightly smaller so they never collide */
+.topNumber, .bottomNumber {
+  font-size: 13px;     /* reduced from 14–18px */
+  line-height: 1.02;
+  font-weight: 400;
+  text-align: right;
+}
 
-/* Remove purple banner — no banner styles included */
+/* Multiply sign */
+.times {
+  font-size: 13px;
+  line-height: 1;
+  text-align: left;
+}
 
-/* Print rules: mirror on-screen to avoid layout shifts */
+/* Separator moved down to avoid touching numbers */
+.line {
+  width: 100%;
+  height: 2px;
+  background: #000;
+  margin-top: 6px;      /* ensure clear gap below numbers */
+  box-sizing: border-box;
+}
+
+/* Writable area */
+.writeArea {
+  height: 0.20in;       /* slightly larger than before but safe */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Answer-sheet compact adjustments (page 2) */
+.cellCompact { height: 0.36in; min-height: 0.36in; padding: 3px 2px; overflow: visible; }
+.topNumberCompact, .bottomNumberCompact, .answerValue { font-size: 11px; line-height: 1.02; }
+
 @media print {
   .sheet { padding: 8px; }
-  .grid { gap: 4px; grid-template-columns: repeat(10, 1fr); }
-  .cell { height: 0.58in; min-height: 0.58in; padding: 3px 2px }
-  .writeArea { height: 0.18in }
-  .no-print { display:none !important }
-}
-
-/* Responsive: on smaller screens reduce columns visually (for on-screen only) but print will always use 10 columns */
-@media (max-width: 1024px) {
-  .grid { grid-template-columns: repeat(8, 1fr); }
-}
-@media (max-width: 768px) {
-  .grid { grid-template-columns: repeat(5, 1fr); }
-}
-@media (max-width: 420px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
+  .cell { height: 0.58in !important; min-height: 0.58in !important; padding: 3px 2px !important; }
+  .line { margin-top: 6px !important; }
+  .writeArea { height: 0.20in !important; }
+  .no-print { display: none !important; }
 }
