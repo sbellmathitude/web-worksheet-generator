@@ -34,16 +34,111 @@ export function generateProblems(opts: {
   }
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
-  // Generate a progression starting at 0: M×0, M×1, ..., M×9 repeated to fill the grid.
+  // Generate using ABCABCABCC pattern per 10-row block to ensure variety.
   if (mode === "single") {
-    const m = opts.fixedMultiplier ?? 2;
-    const seq = Array.from({ length: 10 }).map((_, i) => i); // 0..9
+    const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
+
+    // Build ordered A and B lists (n = 0..9)
+    const A = Array.from({ length: 10 }).map((_, i) => ({ a: m, b: i }));
+    const B = Array.from({ length: 10 }).map((_, i) => ({ a: i, b: m }));
+
+    // Candidate pool for C: mix of A and B, shuffled; we'll draw from it without repeating pairs
+    const candidates = shuffle(
+      Array.from(new Set([...A, ...B].map((p) => `${p.a}x${p.b}`))).map((key) => {
+        const [as, bs] = key.split("x").map(Number);
+        return { a: as, b: bs };
+      })
+    );
+
+    // caps
+    const ZERO_CAP = 5;
+    const ONE_CAP = 8;
+    let zeroCount = 0;
+    let oneCount = 0;
+
+    const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"]; // 10 items
+
+    let blockIndex = 0;
+    let candidateIdx = 0;
+
     while (results.length < count) {
-      for (const n of seq) {
-        if (results.length >= count) break;
-        pushPair(m, n);
+      // For each block of 10, produce items according to pattern using index i
+      for (let i = 0; i < pattern.length && results.length < count; i++) {
+        const token = pattern[i];
+        let pair: { a: number; b: number } | null = null;
+
+        if (token === "A") pair = A[blockIndex % A.length];
+        else if (token === "B") pair = B[blockIndex % B.length];
+        else {
+          // token === "C" => pick next candidate that isn't already used
+          let attempts = 0;
+          while (attempts < candidates.length) {
+            const cand = candidates[candidateIdx % candidates.length];
+            candidateIdx++;
+            attempts++;
+            // check if already used
+            const exists = results.some((r) => r.a === cand.a && r.b === cand.b);
+            if (exists) continue;
+            pair = cand;
+            break;
+          }
+          // if none found, fallback to some A or B that isn't used
+          if (!pair) {
+            const fallback = [...A, ...B].find((p) => !results.some((r) => r.a === p.a && r.b === p.b));
+            if (fallback) pair = fallback;
+          }
+        }
+
+        if (!pair) continue; // nothing to push (shouldn't happen)
+
+        // enforce caps: count any appearance of 0 or 1 in either factor
+        const involvesZero = pair.a === 0 || pair.b === 0;
+        const involvesOne = pair.a === 1 || pair.b === 1;
+        if (involvesZero && zeroCount >= ZERO_CAP) {
+          // try to find an alternative non-zero pair
+          const alt = [...A, ...B, ...candidates].find((p) => !(p.a === 0 || p.b === 0) && !results.some((r) => r.a === p.a && r.b === p.b));
+          if (alt) pair = alt;
+          else continue; // skip if truly cannot find
+        }
+        if (involvesOne && oneCount >= ONE_CAP) {
+          const alt = [...A, ...B, ...candidates].find((p) => !(p.a === 1 || p.b === 1) && !results.some((r) => r.a === p.a && r.b === p.b));
+          if (alt) pair = alt;
+          else continue;
+        }
+
+        // avoid exact duplicates
+        if (results.some((r) => r.a === pair!.a && r.b === pair!.b)) continue;
+
+        // push and update counts
+        pushPair(pair.a, pair.b);
+        if (pair.a === 0 || pair.b === 0) zeroCount++;
+        if (pair.a === 1 || pair.b === 1) oneCount++;
+      }
+
+      blockIndex++;
+
+      // safety: if we loop too many times without filling, break and fill with fallback
+      if (blockIndex > 1000) break;
+    }
+
+    // If still short, fill with any remaining allowed pairs (respecting caps if possible)
+    if (results.length < count) {
+      const pool: { a: number; b: number }[] = [];
+      for (let a = 0; a <= 9; a++) for (let b = 0; b <= 9; b++) pool.push({ a, b });
+      let pIdx = 0;
+      while (results.length < count && pIdx < pool.length) {
+        const p = pool[pIdx++];
+        if (results.some((r) => r.a === p.a && r.b === p.b)) continue;
+        const involvesZero = p.a === 0 || p.b === 0;
+        const involvesOne = p.a === 1 || p.b === 1;
+        if (involvesZero && zeroCount >= ZERO_CAP) continue;
+        if (involvesOne && oneCount >= ONE_CAP) continue;
+        pushPair(p.a, p.b);
+        if (involvesZero) zeroCount++;
+        if (involvesOne) oneCount++;
       }
     }
+
     return results.slice(0, count);
   }
 
@@ -100,12 +195,14 @@ export function generateProblems(opts: {
 
     if (involvesZero && zeroCount >= ZERO_CAP) {
       // skip this pair
-      // but if all remaining pairs would be skipped, we'll eventually relax; continue
       continue;
     }
     if (involvesOne && oneCount >= ONE_CAP) {
       continue;
     }
+
+    // avoid duplicates
+    if (results.some((r) => r.a === p.a && r.b === p.b)) continue;
 
     pushPair(p.a, p.b);
     if (involvesZero) zeroCount++;

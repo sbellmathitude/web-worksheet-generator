@@ -13,92 +13,100 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
   const total = cols * rows;
   const filled = problems.slice(0, total);
 
+  // Render main worksheet as its own sheet so it prints on page 1, and answers as a separate sheet (page 2)
   return (
-    <div className={styles.sheet}>
-      <div className={styles.header}>
-        <div className={styles.headerCenter}>
-          <div className={styles.title}>Calculation Corner</div>
-          <div className={styles.sub}>Practice your multiplication — show your work.</div>
+    <>
+      <div className={styles.sheet}>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <img src="/images/logo.png" alt="MQ logo" className={styles.logoSmall} />
+          </div>
+          <div className={styles.headerCenter}>
+            <div className={styles.title}>Mathitude Multiplication Worksheet Generator</div>
+            <div className={styles.sub}>Practice your multiplication.</div>
+          </div>
+          <div style={{ width: 80 }} aria-hidden />
         </div>
-        <div className={styles.headerRight} aria-hidden />
+
+        <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+          {Array.from({ length: total }).map((_, i) => {
+            const p = filled[i];
+            return (
+              <div key={i} className={styles.cell}>
+                {p ? (
+                  <div className={styles.vertical}>
+                    <div className={styles.rowGrid} aria-hidden>
+                      <div className={styles.leftCell} />
+                      <div className={styles.topNumber}>{p.a}</div>
+                    </div>
+
+                    <div className={styles.rowGrid} aria-hidden>
+                      <div className={styles.times}>×</div>
+                      <div className={styles.bottomNumber}>{p.b}</div>
+                    </div>
+
+                    <div className={styles.rowGrid} aria-hidden>
+                      <div className={styles.leftCell} />
+                      <div className={styles.line} />
+                    </div>
+
+                    <div className={styles.writeArea}></div>
+                  </div>
+                ) : (
+                  <div className={styles.empty} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className={styles.footer}>
+          <div className={styles.footerText}>© Mathitude 2026</div>
+        </div>
       </div>
 
-      <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-        {Array.from({ length: total }).map((_, i) => {
-          const p = filled[i];
-          return (
-            <div key={i} className={styles.cell}>
-              {p ? (
-                <div className={styles.vertical}>
-                  <div className={styles.rowGrid} aria-hidden>
-                    <div className={styles.leftCell} />
-                    <div className={styles.topNumber}>{p.a}</div>
-                  </div>
-
-                  <div className={styles.rowGrid} aria-hidden>
-                    <div className={styles.times}>×</div>
-                    <div className={styles.bottomNumber}>{p.b}</div>
-                  </div>
-
-                  <div className={styles.rowGrid} aria-hidden>
-                    <div className={styles.leftCell} />
-                    <div className={styles.line} />
-                  </div>
-
-                  <div className={styles.writeArea}></div>
-                </div>
-              ) : (
-                <div className={styles.empty} />
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Answer sheet: a second, more compact version with answers in red under each corresponding problem */}
       {includeAnswers && (
-        <div className={styles.answerSheet}>
-          <div className={styles.answerHeader}>
-            <div className={styles.answerTitle}>Answer Key — Compact</div>
+        <div className={styles.sheet}>
+          <div className={styles.answerSheet}>
+            <div className={styles.answerHeader}>
+              <div className={styles.answerTitle}>Answer Key — Compact</div>
+            </div>
+
+            <div className={styles.gridCompact} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+              {Array.from({ length: total }).map((_, i) => {
+                const p = filled[i];
+                return (
+                  <div key={`a-${i}`} className={styles.cellCompact}>
+                    {p ? (
+                      <div className={styles.verticalCompact}>
+                        <div className={styles.rowGridCompact} aria-hidden>
+                          <div className={styles.leftCell} />
+                          <div className={styles.topNumberCompact}>{p.a}</div>
+                        </div>
+
+                        <div className={styles.rowGridCompact} aria-hidden>
+                          <div className={styles.times}>×</div>
+                          <div className={styles.bottomNumberCompact}>{p.b}</div>
+                        </div>
+
+                        <div className={styles.lineCompact} />
+
+                        <div className={styles.answerValue} aria-hidden>{p.answer}</div>
+                      </div>
+                    ) : (
+                      <div className={styles.empty} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          <div className={styles.gridCompact} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-            {Array.from({ length: total }).map((_, i) => {
-              const p = filled[i];
-              return (
-                <div key={`a-${i}`} className={styles.cellCompact}>
-                  {p ? (
-                    <div className={styles.verticalCompact}>
-                      <div className={styles.rowGridCompact} aria-hidden>
-                        <div className={styles.leftCell} />
-                        <div className={styles.topNumberCompact}>{p.a}</div>
-                      </div>
-
-                      <div className={styles.rowGridCompact} aria-hidden>
-                        <div className={styles.times}>×</div>
-                        <div className={styles.bottomNumberCompact}>{p.b}</div>
-                      </div>
-
-                      <div className={styles.lineCompact} />
-
-                      <div className={styles.answerValue} aria-hidden>{p.answer}</div>
-                    </div>
-                  ) : (
-                    <div className={styles.empty} />
-                  )}
-                </div>
-              );
-            })}
+          <div className={styles.footer}>
+            <div className={styles.footerText}>© Mathitude 2026</div>
           </div>
         </div>
       )}
-
-      <div className={styles.footer}>
-        <div className={styles.footerInner}>
-          <img src="/images/logo.png" alt="MQ logo" className={styles.footerLogo} />
-          <div className={styles.footerText}>Mathitude 2026</div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
