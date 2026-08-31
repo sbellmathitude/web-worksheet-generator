@@ -55,34 +55,33 @@ export default function Home() {
       </Head>
 
       <main className="container">
-        {/* Clean header - title centered, controls/print on right, NO logo */}
-        <div style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "space-between", 
-          gap: 24, 
-          marginBottom: 24,
-          paddingBottom: 16,
-          borderBottom: "1px solid #e5e7eb"
-        }}>
-          <div style={{ flex: 1, textAlign: 'center' }}>
-            <h1 style={{ 
-              margin: 0, 
-              fontSize: 32, 
-              fontFamily: '"Original Surfer", cursive', 
-              color: '#7030a0',
-              fontWeight: 400,
-              letterSpacing: 0.5
-            }}>
-              Mathitude Multiplication Worksheet Generator
-            </h1>
-          </div>
+        {/* Title on top, menu below */}
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ 
+            margin: '0 0 24px 0', 
+            fontSize: 32, 
+            fontFamily: '"Original Surfer", cursive', 
+            color: '#7030a0',
+            fontWeight: 400,
+            letterSpacing: 0.5,
+            textAlign: 'center'
+          }}>
+            Mathitude Multiplication Worksheet Generator
+          </h1>
 
-          <div style={{ display: 'flex', gap: 12, flexShrink: 0 }} className="no-print">
-            <Controls compact onGenerate={handleGenerate} />
+          {/* Menu row: all controls aligned horizontally */}
+          <div style={{ 
+            display: 'flex', 
+            gap: 12, 
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            paddingTop: 16,
+            borderTop: '1px solid #e5e7eb'
+          }} className="no-print">
+            <Controls onGenerate={handleGenerate} />
             <button
               onClick={handlePrint}
-              className="btn"
               style={{
                 padding: "8px 16px",
                 background: "#3b82f6",
@@ -90,7 +89,7 @@ export default function Home() {
                 borderRadius: 6,
                 border: "none",
                 cursor: "pointer",
-                fontWeight: 500,
+                fontWeight: 600,
                 fontSize: 14
               }}
             >

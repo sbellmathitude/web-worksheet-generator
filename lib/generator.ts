@@ -36,15 +36,9 @@ export function generateProblems(opts: {
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
   // A rows: M × 0, M × 1, M × 2, M × 3 (pattern repeats)
   // B rows: 0 × M, 1 × M, 2 × M, 3 × M (pattern repeats)
-  // C rows: random mix where one multiplier is always 2, with caps on 0 and 1 multiplicands
+  // C rows: random mix where one multiplier is always 2, NO 0 or 1 multiplicands
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
-
-    // Track zero and one counts across all C rows only
-    const ZERO_CAP = 5;
-    const ONE_CAP = 8;
-    let zeroCount = 0;
-    let oneCount = 0;
 
     // Pattern for a 10-item block: ABCABCABCC
     const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
@@ -57,40 +51,27 @@ export function generateProblems(opts: {
         let pair: { a: number; b: number } | null = null;
 
         if (token === "A") {
-          // A row: M × n where n cycles 0, 1, 2, 3, 0, 1, 2, 3, ...
-          const n = (i + blockIndex * 4) % 4;
+          // A row: M × 0, M × 1, M × 2, M × 3 (cycling)
+          const n = i % 4;
           pair = { a: m, b: n };
         } else if (token === "B") {
-          // B row: n × M where n cycles 0, 1, 2, 3, 0, 1, 2, 3, ...
-          const n = (i + blockIndex * 4) % 4;
+          // B row: 0 × M, 1 × M, 2 × M, 3 × M (cycling)
+          const n = i % 4;
           pair = { a: n, b: m };
         } else {
-          // token === "C": random mix with one multiplier always 2
-          // Generate a random pair where either a=2 or b=2
+          // token === "C": random mix where one multiplier is always 2, NO 0 or 1
+          // Generate pairs with 2 as one factor, but other factor must be 2-9
           let attempts = 0;
           while (attempts < 100) {
             const isATwo = Math.random() > 0.5;
             let candidate: { a: number; b: number };
             
             if (isATwo) {
-              // a = 2, b is random 0-9
-              candidate = { a: 2, b: Math.floor(Math.random() * 10) };
+              // a = 2, b is random 2-9 (no 0 or 1)
+              candidate = { a: 2, b: Math.floor(Math.random() * 8) + 2 };
             } else {
-              // b = 2, a is random 0-9
-              candidate = { a: Math.floor(Math.random() * 10), b: 2 };
-            }
-
-            // Check caps before adding
-            const involvesZero = candidate.a === 0 || candidate.b === 0;
-            const involvesOne = candidate.a === 1 || candidate.b === 1;
-
-            if (involvesZero && zeroCount >= ZERO_CAP) {
-              attempts++;
-              continue;
-            }
-            if (involvesOne && oneCount >= ONE_CAP) {
-              attempts++;
-              continue;
+              // b = 2, a is random 2-9 (no 0 or 1)
+              candidate = { a: Math.floor(Math.random() * 8) + 2, b: 2 };
             }
 
             // Check if already used in results
@@ -104,13 +85,9 @@ export function generateProblems(opts: {
           }
 
           if (!pair) {
-            // Fallback: find any allowed pair with 2 as one multiplier
-            for (let x = 0; x <= 9; x++) {
+            // Fallback: find any allowed pair with 2 as one multiplier (both factors 2-9)
+            for (let x = 2; x <= 9; x++) {
               for (const [a, b] of [[2, x], [x, 2]]) {
-                const involvesZero = a === 0 || b === 0;
-                const involvesOne = a === 1 || b === 1;
-                if (involvesZero && zeroCount >= ZERO_CAP) continue;
-                if (involvesOne && oneCount >= ONE_CAP) continue;
                 if (results.some((r) => r.a === a && r.b === b)) continue;
                 pair = { a, b };
                 break;
@@ -121,14 +98,6 @@ export function generateProblems(opts: {
         }
 
         if (!pair) continue;
-
-        // For C rows, update counts
-        if (pattern[i] === "C") {
-          const involvesZero = pair.a === 0 || pair.b === 0;
-          const involvesOne = pair.a === 1 || pair.b === 1;
-          if (involvesZero) zeroCount++;
-          if (involvesOne) oneCount++;
-        }
 
         pushPair(pair.a, pair.b);
       }
