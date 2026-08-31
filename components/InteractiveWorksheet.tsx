@@ -81,6 +81,7 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
               id={p.id}
               className={`problem ${isCorrect ? 'correct' : ''} ${isSelected ? 'selected' : ''}`}
               onClick={() => setSelected(p.id)}
+              style={{ padding: 0, borderRadius: 8, background: 'transparent', transition: 'transform .18s ease, box-shadow .18s ease', minHeight: 84 }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8, height: '100%' }}>
                 <div className="problemBox" style={{ width: '100%', padding: 8, borderRadius: 8, background: isCorrect ? bg : (isSelected ? 'rgba(0,0,0,0.04)' : 'transparent'), boxSizing: 'border-box' }}>
@@ -104,13 +105,10 @@ export default function InteractiveWorksheet({ problems, cols = 10 }: { problems
       </div>
 
       <style jsx>{`
-        .problem { padding: 0; border-radius: 8px; background: transparent; transition: transform .18s ease, box-shadow .18s ease; min-height: 84px; }
+        .problem { outline: 3px solid transparent; }
         .problem.selected { outline: 3px solid rgba(99,102,241,0.12); }
         .problem.correct { transform: scale(1.02); box-shadow: 0 10px 30px rgba(16,24,40,0.12); }
-        .problem.correct .problemBox { /* background set inline */ }
         .problemText { font-size: 16px; }
-
-        /* confetti */
         .confetti { position: absolute; border-radius: 3px; opacity: 0.95; transform-origin: center; animation: confettiFall 900ms linear forwards; z-index: 9999; }
         @keyframes confettiFall { 0% { transform: translateY(0) rotate(0) scale(1); opacity: 1; } 100% { transform: translateY(160px) rotate(720deg) scale(0.85); opacity: 0; } }
       `}</style>
