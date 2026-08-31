@@ -26,7 +26,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
               <div className={styles.title}>Mathitude Multiplication Worksheet Generator</div>
               <div className={styles.sub}>Practice your multiplication.</div>
             </div>
-            <div style={{ width: 80 }} aria-hidden />
+            <div style={{ width: 60 }} aria-hidden />
           </div>
 
           <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>

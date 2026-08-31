@@ -43,6 +43,10 @@ export default function Home() {
     }, 50);
   }
 
+  function handlePrint() {
+    window.print();
+  }
+
   return (
     <>
       <Head>
@@ -51,19 +55,47 @@ export default function Home() {
       </Head>
 
       <main className="container">
-        {/* Header with logo on the left and centered title (Option C) */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src="/images/logo.png" alt="MQ logo" style={{ height: 32, width: 'auto' }} />
-          </div>
-
+        {/* Clean header - title centered, controls/print on right, NO logo */}
+        <div style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between", 
+          gap: 24, 
+          marginBottom: 24,
+          paddingBottom: 16,
+          borderBottom: "1px solid #e5e7eb"
+        }}>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <h1 style={{ margin: 0, fontSize: 18, color: '#7030a0' }}>Mathitude Multiplication Worksheet Generator</h1>
-            <div style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }}>Practice your multiplication.</div>
+            <h1 style={{ 
+              margin: 0, 
+              fontSize: 32, 
+              fontFamily: '"Original Surfer", cursive', 
+              color: '#7030a0',
+              fontWeight: 400,
+              letterSpacing: 0.5
+            }}>
+              Mathitude Multiplication Worksheet Generator
+            </h1>
           </div>
 
-          <div style={{ width: 140, display: 'flex', justifyContent: 'flex-end' }} className="no-print">
+          <div style={{ display: 'flex', gap: 12, flexShrink: 0 }} className="no-print">
             <Controls compact onGenerate={handleGenerate} />
+            <button
+              onClick={handlePrint}
+              className="btn"
+              style={{
+                padding: "8px 16px",
+                background: "#3b82f6",
+                color: "white",
+                borderRadius: 6,
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 500,
+                fontSize: 14
+              }}
+            >
+              Print
+            </button>
           </div>
         </div>
 
