@@ -61,127 +61,97 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
     }
   }
 
-  if (compact) {
-    return (
-      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button
-            className="btn"
-            onClick={() => setActivity("pdf")}
-            style={{
-              fontWeight: 700,
-              padding: "8px 10px",
-              background: activity === "pdf" ? "linear-gradient(90deg,#60a5fa,#7c3aed)" : "white",
-              color: activity === "pdf" ? "white" : "#111827",
-              border: activity === "pdf" ? "none" : "1px solid #e6eef6",
-              borderRadius: 8
-            }}
-          >
-            PDF
-          </button>
-
-          <button
-            className="btn"
-            onClick={() => setActivity("interactive")}
-            style={{
-              fontWeight: 700,
-              padding: "8px 10px",
-              background: activity === "interactive" ? "linear-gradient(90deg,#f97316,#f43f5e)" : "white",
-              color: activity === "interactive" ? "white" : "#111827",
-              border: activity === "interactive" ? "none" : "1px solid #e6eef6",
-              borderRadius: 8
-            }}
-          >
-            Interactive
-          </button>
-        </div>
-
-        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ padding: "8px", borderRadius: 8, border: "1px solid #e6eef6", minWidth: 160 }}>
-          {/* single multiplier options (2..9 only) */}
-          {Array.from({ length: 8 }).map((_, i) => {
-            const val = i + 2;
-            return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
-          })}
-
-          <option value="range:2-9">Range: 2–9</option>
-          <option value="range:3-8">Range: 3–8</option>
-          <option value="range:0-9">Range: 0–9</option>
-        </select>
-
-        {activity === "pdf" && (
-          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} />
-            <span style={{ fontSize: 13 }}>answer key</span>
-          </label>
-        )}
-
-        <button onClick={handleGenerate} className="btn" style={{ padding: "8px 12px", background: "#10b981", color: "white", borderRadius: 8 }}>Generate</button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div style={{ display: "flex", gap: 8 }}>
+    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      {/* Activity toggle buttons */}
+      <div style={{ display: "flex", gap: 6 }}>
         <button
-          className="btn"
           onClick={() => setActivity("pdf")}
           style={{
-            flex: 1,
             fontWeight: 700,
+            padding: "8px 12px",
             background: activity === "pdf" ? "linear-gradient(90deg,#60a5fa,#7c3aed)" : "white",
             color: activity === "pdf" ? "white" : "#111827",
-            border: activity === "pdf" ? "none" : "1px solid #d1d5db"
+            border: activity === "pdf" ? "none" : "1px solid #e6eef6",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontSize: 14
           }}
         >
           PDF
         </button>
+
         <button
-          className="btn"
           onClick={() => setActivity("interactive")}
           style={{
-            flex: 1,
             fontWeight: 700,
+            padding: "8px 12px",
             background: activity === "interactive" ? "linear-gradient(90deg,#f97316,#f43f5e)" : "white",
             color: activity === "interactive" ? "white" : "#111827",
-            border: activity === "interactive" ? "none" : "1px solid #d1d5db"
+            border: activity === "interactive" ? "none" : "1px solid #e6eef6",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontSize: 14
           }}
         >
           Interactive
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <label style={{ fontSize: 13, minWidth: 72 }}>Problem set</label>
-        <select value={spec} onChange={(e) => setSpec(e.target.value)} style={{ flex: 1 }}>
-          {/* single multiplier options (2..9) */}
-          {Array.from({ length: 8 }).map((_, i) => {
-            const val = i + 2;
-            return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
-          })}
+      {/* Problem set selector */}
+      <select 
+        value={spec} 
+        onChange={(e) => setSpec(e.target.value)} 
+        style={{ 
+          padding: "8px 10px", 
+          borderRadius: 6, 
+          border: "1px solid #e6eef6", 
+          minWidth: 160,
+          fontSize: 14,
+          background: "white",
+          cursor: "pointer"
+        }}
+      >
+        {/* single multiplier options (2..9 only) */}
+        {Array.from({ length: 8 }).map((_, i) => {
+          const val = i + 2;
+          return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
+        })}
 
-          <option value="range:2-9">Range: 2–9</option>
-          <option value="range:3-8">Range: 3–8</option>
-          <option value="range:0-9">Range: 0–9</option>
-        </select>
-      </div>
+        <option value="range:2-9">Range: 2–9</option>
+        <option value="range:3-8">Range: 3–8</option>
+        <option value="range:0-9">Range: 0–9</option>
+      </select>
 
+      {/* Answer key checkbox (PDF only) */}
       {activity === "pdf" && (
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input type="checkbox" checked={includeAnswers} onChange={(e) => setIncludeAnswers(e.target.checked)} />
-          Include answer key
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
+          <input 
+            type="checkbox" 
+            checked={includeAnswers} 
+            onChange={(e) => setIncludeAnswers(e.target.checked)}
+            style={{ cursor: "pointer" }}
+          />
+          Answer key
         </label>
       )}
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={handleGenerate}
-          className="btn"
-          style={{ padding: "8px 12px", flex: 1 }}
-        >
-          Generate {activity === "interactive" ? "Interactive" : "PDF"}
-        </button>
-      </div>
+      {/* Generate button */}
+      <button 
+        onClick={handleGenerate} 
+        style={{ 
+          padding: "8px 16px", 
+          background: "#10b981", 
+          color: "white", 
+          borderRadius: 6,
+          border: "none",
+          cursor: "pointer",
+          fontWeight: 600,
+          fontSize: 14
+        }}
+      >
+        Generate
+      </button>
     </div>
   );
 };
