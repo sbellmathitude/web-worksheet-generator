@@ -85,12 +85,12 @@ export default function Home() {
             onClick={handlePrint}
             style={{
               padding: "8px 16px",
-              background: "#3b82f6",
+              background: "linear-gradient(90deg,#f97316,#f43f5e)",
               color: "white",
               borderRadius: 6,
               border: "none",
               cursor: "pointer",
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: 14
             }}
           >
