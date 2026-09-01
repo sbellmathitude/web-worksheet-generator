@@ -13,7 +13,6 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
   const total = cols * rows;
   const filled = problems.slice(0, total);
 
-  // Render main worksheet as its own sheet so it prints on page 1, and answers as a separate sheet (page 2)
   return (
     <>
       <div className={styles.sheetContainer}>
@@ -39,7 +38,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                         <div className={styles.topNumber}>{p.a}</div>
                       </div>
 
-                      <div className={styles.bottomRow} aria-hidden>
+                      <div className={styles.middleRow} aria-hidden>
                         <div className={styles.times}>×</div>
                         <div className={styles.bottomNumber}>{p.b}</div>
                       </div>
@@ -82,7 +81,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                           <div className={styles.topNumber}>{p.a}</div>
                         </div>
 
-                        <div className={styles.bottomRow} aria-hidden>
+                        <div className={styles.middleRow} aria-hidden>
                           <div className={styles.times}>×</div>
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
