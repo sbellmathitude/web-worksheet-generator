@@ -54,50 +54,51 @@ export default function Home() {
         <meta name="description" content="Printable multiplication worksheets (Calculation Corner)" />
       </Head>
 
-      <main className="container">
-        {/* Title on top, menu below */}
-        <div style={{ marginBottom: 24 }}>
-          <h1 style={{ 
-            margin: '0 0 24px 0', 
-            fontSize: 32, 
-            fontFamily: '"Original Surfer", cursive', 
-            color: '#7030a0',
-            fontWeight: 400,
-            letterSpacing: 0.5,
-            textAlign: 'center'
-          }}>
-            Mathitude Multiplication Worksheet Generator
-          </h1>
+      <main className="container" style={{ maxWidth: '100%' }}>
+        {/* Title */}
+        <h1 style={{ 
+          margin: '0 0 24px 0', 
+          fontSize: 32, 
+          fontFamily: '"Original Surfer", cursive', 
+          color: '#7030a0',
+          fontWeight: 400,
+          letterSpacing: 0.5,
+          textAlign: 'center'
+        }}>
+          Mathitude Multiplication Worksheet Generator
+        </h1>
 
-          {/* Menu row: all controls aligned horizontally */}
-          <div style={{ 
-            display: 'flex', 
-            gap: 12, 
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            paddingTop: 16,
-            borderTop: '1px solid #e5e7eb'
-          }} className="no-print">
-            <Controls onGenerate={handleGenerate} />
-            <button
-              onClick={handlePrint}
-              style={{
-                padding: "8px 16px",
-                background: "#3b82f6",
-                color: "white",
-                borderRadius: 6,
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 600,
-                fontSize: 14
-              }}
-            >
-              Print
-            </button>
-          </div>
+        {/* Menu row: all controls aligned horizontally and centered */}
+        <div style={{ 
+          display: 'flex', 
+          gap: 12, 
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          paddingTop: 16,
+          paddingBottom: 24,
+          borderTop: '1px solid #e5e7eb',
+          marginBottom: 24
+        }} className="no-print">
+          <Controls onGenerate={handleGenerate} />
+          <button
+            onClick={handlePrint}
+            style={{
+              padding: "8px 16px",
+              background: "#3b82f6",
+              color: "white",
+              borderRadius: 6,
+              border: "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: 14
+            }}
+          >
+            Print
+          </button>
         </div>
 
+        {/* Worksheet output */}
         <div style={{ display: "block" }}>
           <div style={{ flex: 1 }} id="worksheet">
             {problems.length === 0 ? (
