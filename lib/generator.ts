@@ -34,9 +34,9 @@ export function generateProblems(opts: {
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
   // Pattern ABCABCABCC repeats every 100 problems:
-  // A (problems 1-10, 31-40, 61-70): M × 0, M × 1, ..., M × 9
-  // B (problems 11-20, 41-50, 71-80): 0 × M, 1 × M, ..., 9 × M
-  // C (problems 21-30, 51-60, 81-90, 91-100): random mix involving M with multiplicands 2–9
+  // A (10 problems each): M × 0, M × 1, ..., M × 9
+  // B (10 problems each): 0 × M, 1 × M, ..., 9 × M
+  // C (10 problems each): random mix involving M with multiplicands 2–9
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
     const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
@@ -46,49 +46,47 @@ export function generateProblems(opts: {
         if (results.length >= count) break;
 
         if (token === "A") {
-          // A: M × 0 through M × 9
+          // A: M × 0 through M × 9 (10 problems)
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(m, j);
           }
         } else if (token === "B") {
-          // B: 0 × M through 9 × M
+          // B: 0 × M through 9 × M (10 problems)
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(j, m);
           }
-        } else {
-          // C: random involving M with multiplicands 2–9
-          for (let j = 0; j < 10 && results.length < count; j++) {
-            let attempts = 0;
-            while (attempts < 100) {
-              const isAM = Math.random() > 0.5;
-              let candidate: { a: number; b: number };
+        } else if (token === "C") {
+          // C: random involving M with multiplicands 2–9 (10 problems)
+          const cProblems: { a: number; b: number }[] = [];
+          let attempts = 0;
+          
+          while (cProblems.length < 10 && attempts < 1000) {
+            const isAM = Math.random() > 0.5;
+            let candidate: { a: number; b: number };
 
-              if (isAM) {
-                candidate = { a: m, b: Math.floor(Math.random() * 8) + 2 };
-              } else {
-                candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
-              }
-
-              if (!results.some((r) => r.a === candidate.a && r.b === candidate.b)) {
-                pushPair(candidate.a, candidate.b);
-                break;
-              }
-              attempts++;
+            if (isAM) {
+              candidate = { a: m, b: Math.floor(Math.random() * 8) + 2 };
+            } else {
+              candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
             }
 
-            // Fallback
-            if (attempts === 100) {
-              let found = false;
-              for (let x = 2; x <= 9; x++) {
-                for (const [a, b] of [[m, x], [x, m]]) {
-                  if (!results.some((r) => r.a === a && r.b === b)) {
-                    pushPair(a, b);
-                    found = true;
-                    break;
-                  }
-                }
-                if (found) break;
-              }
+            // Check if candidate is already in results or cProblems
+            if (
+              results.some((r) => r.a === candidate.a && r.b === candidate.b) ||
+              cProblems.some((p) => p.a === candidate.a && p.b === candidate.b)
+            ) {
+              attempts++;
+              continue;
+            }
+
+            cProblems.push(candidate);
+            attempts = 0; // Reset counter on success
+          }
+
+          // Push all collected C problems
+          for (const p of cProblems) {
+            if (results.length < count) {
+              pushPair(p.a, p.b);
             }
           }
         }
