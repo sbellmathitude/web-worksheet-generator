@@ -49,12 +49,24 @@
   height: 100%;
 }
 
-/* Use a stable inner layout and move the × farther right */
-.rowGrid {
+.topRow {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.middleRow {
   width: 100%;
   display: grid;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 10px 1fr;
   align-items: center;
+}
+
+.lineRow {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Numbers */
@@ -65,12 +77,17 @@
   text-align: right;
 }
 
+.bottomNumber {
+  justify-self: end;
+}
+
 /* Multiply sign */
 .times {
   font-size: 12px;
   line-height: 1;
   text-align: left;
-  transform: translateX(6px);
+  justify-self: start;
+  margin-left: 0;
 }
 
 /* Separator */
