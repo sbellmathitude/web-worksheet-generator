@@ -33,31 +33,30 @@ export function generateProblems(opts: {
   }
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
-  // Pattern repeats every 10 problems: ABCABCABCC
-  // Row A (10 problems): M × 0, M × 1, M × 2, ..., M × 9
-  // Row B (10 problems): 0 × M, 1 × M, 2 × M, ..., 9 × M
-  // Row C (10 problems): random mix involving M with other multiplicands 2–9 (no 0 or 1)
+  // Pattern ABCABCABCC repeats every 100 problems:
+  // A (problems 1-10, 31-40, 61-70): M × 0, M × 1, ..., M × 9
+  // B (problems 11-20, 41-50, 71-80): 0 × M, 1 × M, ..., 9 × M
+  // C (problems 21-30, 51-60, 81-90, 91-100): random mix involving M with multiplicands 2–9
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
     const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
 
-    let blockIndex = 0;
     while (results.length < count) {
-      for (let i = 0; i < pattern.length && results.length < count; i++) {
-        const token = pattern[i];
+      for (const token of pattern) {
+        if (results.length >= count) break;
 
         if (token === "A") {
-          // A row: M × 0 through M × 9
+          // A: M × 0 through M × 9
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(m, j);
           }
         } else if (token === "B") {
-          // B row: 0 × M through 9 × M
+          // B: 0 × M through 9 × M
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(j, m);
           }
         } else {
-          // C row: random involving M with multiplicands 2–9
+          // C: random involving M with multiplicands 2–9
           for (let j = 0; j < 10 && results.length < count; j++) {
             let attempts = 0;
             while (attempts < 100) {
@@ -94,7 +93,6 @@ export function generateProblems(opts: {
           }
         }
       }
-      blockIndex++;
     }
 
     return results.slice(0, count);
