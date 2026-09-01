@@ -33,62 +33,68 @@ export function generateProblems(opts: {
   }
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
-  // Row A (10 problems): M × 0, M × 1, M × 2, M × 3, M × 4, M × 5, M × 6, M × 7, M × 8, M × 9
-  // Row B (10 problems): 0 × M, 1 × M, 2 × M, 3 × M, 4 × M, 5 × M, 6 × M, 7 × M, 8 × M, 9 × M
-  // Rows C onwards: random mix involving M with other multiplicands 2–9 (no 0 or 1)
+  // Pattern repeats every 10 problems: ABCABCABCC
+  // Row A (10 problems): M × 0, M × 1, M × 2, ..., M × 9
+  // Row B (10 problems): 0 × M, 1 × M, 2 × M, ..., 9 × M
+  // Row C (10 problems): random mix involving M with other multiplicands 2–9 (no 0 or 1)
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
+    const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
 
-    // Row A: M × 0 through M × 9
-    for (let i = 0; i < 10 && results.length < count; i++) {
-      pushPair(m, i);
-    }
-
-    // Row B: 0 × M through 9 × M
-    for (let i = 0; i < 10 && results.length < count; i++) {
-      pushPair(i, m);
-    }
-
-    // Remaining: random mix involving M with other multiplicands 2–9 (no 0 or 1)
+    let blockIndex = 0;
     while (results.length < count) {
-      let attempts = 0;
-      while (attempts < 100) {
-        const isAM = Math.random() > 0.5;
-        let candidate: { a: number; b: number };
+      for (let i = 0; i < pattern.length && results.length < count; i++) {
+        const token = pattern[i];
 
-        if (isAM) {
-          // a = M, b is random 2–9
-          candidate = { a: m, b: Math.floor(Math.random() * 8) + 2 };
-        } else {
-          // b = M, a is random 2–9
-          candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
-        }
-
-        // Avoid duplicates
-        if (results.some((r) => r.a === candidate.a && r.b === candidate.b)) {
-          attempts++;
-          continue;
-        }
-
-        pushPair(candidate.a, candidate.b);
-        break;
-      }
-
-      // If we couldn't find a random pair, just try the next iteration
-      if (attempts === 100) {
-        // Fallback: find any allowed pair with M as one multiplier
-        let found = false;
-        for (let x = 2; x <= 9; x++) {
-          for (const [a, b] of [[m, x], [x, m]]) {
-            if (results.some((r) => r.a === a && r.b === b)) continue;
-            pushPair(a, b);
-            found = true;
-            break;
+        if (token === "A") {
+          // A row: M × 0 through M × 9
+          for (let j = 0; j < 10 && results.length < count; j++) {
+            pushPair(m, j);
           }
-          if (found) break;
+        } else if (token === "B") {
+          // B row: 0 × M through 9 × M
+          for (let j = 0; j < 10 && results.length < count; j++) {
+            pushPair(j, m);
+          }
+        } else {
+          // C row: random involving M with multiplicands 2–9
+          for (let j = 0; j < 10 && results.length < count; j++) {
+            let attempts = 0;
+            while (attempts < 100) {
+              const isAM = Math.random() > 0.5;
+              let candidate: { a: number; b: number };
+
+              if (isAM) {
+                candidate = { a: m, b: Math.floor(Math.random() * 8) + 2 };
+              } else {
+                candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
+              }
+
+              if (!results.some((r) => r.a === candidate.a && r.b === candidate.b)) {
+                pushPair(candidate.a, candidate.b);
+                break;
+              }
+              attempts++;
+            }
+
+            // Fallback
+            if (attempts === 100) {
+              let found = false;
+              for (let x = 2; x <= 9; x++) {
+                for (const [a, b] of [[m, x], [x, m]]) {
+                  if (!results.some((r) => r.a === a && r.b === b)) {
+                    pushPair(a, b);
+                    found = true;
+                    break;
+                  }
+                }
+                if (found) break;
+              }
+            }
+          }
         }
-        if (!found) break; // Can't fill anymore
       }
+      blockIndex++;
     }
 
     return results.slice(0, count);
