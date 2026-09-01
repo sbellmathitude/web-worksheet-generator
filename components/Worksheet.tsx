@@ -35,12 +35,11 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                 <div key={i} className={styles.cell}>
                   {p ? (
                     <div className={styles.vertical}>
-                      <div className={styles.rowGridTop} aria-hidden>
-                        <div className={styles.leftCell} />
+                      <div className={styles.topRow} aria-hidden>
                         <div className={styles.topNumber}>{p.a}</div>
                       </div>
 
-                      <div className={styles.rowGridBottom} aria-hidden>
+                      <div className={styles.bottomRow} aria-hidden>
                         <div className={styles.times}>×</div>
                         <div className={styles.bottomNumber}>{p.b}</div>
                       </div>
@@ -79,12 +78,11 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                   <div key={`a-${i}`} className={styles.cell}>
                     {p ? (
                       <div className={styles.vertical}>
-                        <div className={styles.rowGridTop} aria-hidden>
-                          <div className={styles.leftCell} />
+                        <div className={styles.topRow} aria-hidden>
                           <div className={styles.topNumber}>{p.a}</div>
                         </div>
 
-                        <div className={styles.rowGridBottom} aria-hidden>
+                        <div className={styles.bottomRow} aria-hidden>
                           <div className={styles.times}>×</div>
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
