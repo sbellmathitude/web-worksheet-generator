@@ -45,16 +45,22 @@ export function generateProblems(opts: {
       for (const token of pattern) {
         if (results.length >= count) break;
 
+        console.log(`[SINGLE] Token: ${token}, Current count: ${results.length}`);
+
         if (token === "A") {
           // A: M × 0 through M × 9 (10 problems)
+          const before = results.length;
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(m, j);
           }
+          console.log(`  A row pushed ${results.length - before} problems`);
         } else if (token === "B") {
           // B: 0 × M through 9 × M (10 problems)
+          const before = results.length;
           for (let j = 0; j < 10 && results.length < count; j++) {
             pushPair(j, m);
           }
+          console.log(`  B row pushed ${results.length - before} problems`);
         } else if (token === "C") {
           // C: random involving M with multiplicands 2–9 (10 problems)
           const cProblems: { a: number; b: number }[] = [];
@@ -84,15 +90,18 @@ export function generateProblems(opts: {
           }
 
           // Push all collected C problems
+          const before = results.length;
           for (const p of cProblems) {
             if (results.length < count) {
               pushPair(p.a, p.b);
             }
           }
+          console.log(`  C row collected ${cProblems.length}, pushed ${results.length - before} problems`);
         }
       }
     }
 
+    console.log(`[SINGLE] Final count: ${results.length}`);
     return results.slice(0, count);
   }
 
