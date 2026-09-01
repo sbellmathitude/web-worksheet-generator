@@ -25,7 +25,7 @@
 .grid { 
   display: grid; 
   grid-template-columns: repeat(10, 1fr); 
-  gap: 3px;
+  gap: 4px;
   flex: 1;
 }
 
@@ -60,7 +60,7 @@
 
 /* Numbers */
 .topNumber, .bottomNumber {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   font-weight: 400;
   text-align: right;
@@ -68,7 +68,7 @@
 
 /* Multiply sign */
 .times {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
   text-align: left;
 }
@@ -193,7 +193,7 @@
   .sheet { 
     width: 8.5in;
     height: 11in;
-    padding: 0.4in;
+    padding: 0.5in;
     box-shadow: none;
     background: #ffffff;
   }
