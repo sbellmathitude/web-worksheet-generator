@@ -23,8 +23,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
               <img src="/images/logo.png" alt="MQ logo" className={styles.logoSmall} />
             </div>
             <div className={styles.headerCenter}>
-              <div className={styles.title}>Mathitude Multiplication Worksheet Generator</div>
-              <div className={styles.sub}>Practice your multiplication.</div>
+              <div className={styles.title}>Multiplication Practice</div>
             </div>
             <div style={{ width: 60 }} aria-hidden />
           </div>
@@ -62,7 +61,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
           </div>
 
           <div className={styles.footer}>
-            <div className={styles.footerText} style={{ fontFamily: '"Original Surfer", cursive', color: '#7030a0' }}>© Mathitude 2026</div>
+            <div className={styles.footerText} style={{ fontFamily: '\"Original Surfer\", cursive', color: '#7030a0' }}>© Mathitude 2026</div>
           </div>
         </div>
       </div>
@@ -104,7 +103,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
             </div>
 
             <div className={styles.footer}>
-              <div className={styles.footerText} style={{ fontFamily: '"Original Surfer", cursive', color: '#7030a0' }}>© Mathitude 2026</div>
+              <div className={styles.footerText} style={{ fontFamily: '\"Original Surfer\", cursive', color: '#7030a0' }}>© Mathitude 2026</div>
             </div>
           </div>
         </div>
