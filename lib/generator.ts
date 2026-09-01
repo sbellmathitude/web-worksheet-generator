@@ -63,6 +63,7 @@ export function generateProblems(opts: {
           console.log(`  B row pushed ${results.length - before} problems`);
         } else if (token === "C") {
           // C: random involving M with multiplicands 2–9 (10 problems)
+          // C can include duplicates from A/B, just avoid duplicates within C row itself
           const cProblems: { a: number; b: number }[] = [];
           let attempts = 0;
           
@@ -76,11 +77,8 @@ export function generateProblems(opts: {
               candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
             }
 
-            // Check if candidate is already in results or cProblems
-            if (
-              results.some((r) => r.a === candidate.a && r.b === candidate.b) ||
-              cProblems.some((p) => p.a === candidate.a && p.b === candidate.b)
-            ) {
+            // Only check if candidate is already in THIS C row (allow duplicates from A/B)
+            if (cProblems.some((p) => p.a === candidate.a && p.b === candidate.b)) {
               attempts++;
               continue;
             }
