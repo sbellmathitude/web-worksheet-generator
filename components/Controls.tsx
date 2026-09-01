@@ -141,12 +141,12 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
         onClick={handleGenerate} 
         style={{ 
           padding: "8px 16px", 
-          background: "#10b981", 
+          background: "linear-gradient(90deg,#60a5fa,#7c3aed)",
           color: "white", 
           borderRadius: 6,
           border: "none",
           cursor: "pointer",
-          fontWeight: 600,
+          fontWeight: 700,
           fontSize: 14
         }}
       >
