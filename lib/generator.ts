@@ -3,7 +3,6 @@ export type Problem = {
   a: number;
   b: number;
   answer: number;
-  format?: "ab" | "ba"; // whether displayed as a × b or b × a
 };
 
 export type PracticeMode = "single" | "limited" | "full" | "interactive";
@@ -34,15 +33,14 @@ export function generateProblems(opts: {
   }
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
-  // A rows: M × 0, M × 1, M × 2, M × 3 (pattern repeats)
-  // B rows: 0 × M, 1 × M, 2 × M, 3 × M (pattern repeats)
-  // C rows: random mix where one multiplier is always 2, NO 0 or 1 multiplicands
+  // Pattern: ABCABCABCC (10-item repeating block)
+  // A: M × 0, M × 1, M × 2, M × 3 (cycling)
+  // B: 0 × M, 1 × M, 2 × M, 3 × M (cycling)
+  // C: random mix involving M with other multiplicands 2–9 (no 0 or 1)
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
-
-    // Pattern for a 10-item block: ABCABCABCC
     const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
-    
+
     let blockIndex = 0;
 
     while (results.length < count) {
@@ -51,30 +49,29 @@ export function generateProblems(opts: {
         let pair: { a: number; b: number } | null = null;
 
         if (token === "A") {
-          // A row: M × 0, M × 1, M × 2, M × 3 (cycling)
-          const n = i % 4;
+          // A row: M × (0,1,2,3) cycling
+          const n = (blockIndex * pattern.length + i) % 4;
           pair = { a: m, b: n };
         } else if (token === "B") {
-          // B row: 0 × M, 1 × M, 2 × M, 3 × M (cycling)
-          const n = i % 4;
+          // B row: (0,1,2,3) × M cycling
+          const n = (blockIndex * pattern.length + i) % 4;
           pair = { a: n, b: m };
         } else {
-          // token === "C": random mix where one multiplier is always 2, NO 0 or 1
-          // Generate pairs with 2 as one factor, but other factor must be 2-9
+          // C row: random involving M, other factor 2–9
           let attempts = 0;
           while (attempts < 100) {
-            const isATwo = Math.random() > 0.5;
+            const isAM = Math.random() > 0.5;
             let candidate: { a: number; b: number };
-            
-            if (isATwo) {
-              // a = 2, b is random 2-9 (no 0 or 1)
-              candidate = { a: 2, b: Math.floor(Math.random() * 8) + 2 };
+
+            if (isAM) {
+              // a = M, b is random 2–9
+              candidate = { a: m, b: Math.floor(Math.random() * 8) + 2 };
             } else {
-              // b = 2, a is random 2-9 (no 0 or 1)
-              candidate = { a: Math.floor(Math.random() * 8) + 2, b: 2 };
+              // b = M, a is random 2–9
+              candidate = { a: Math.floor(Math.random() * 8) + 2, b: m };
             }
 
-            // Check if already used in results
+            // Avoid duplicates
             if (results.some((r) => r.a === candidate.a && r.b === candidate.b)) {
               attempts++;
               continue;
@@ -84,10 +81,10 @@ export function generateProblems(opts: {
             break;
           }
 
+          // Fallback if random fails
           if (!pair) {
-            // Fallback: find any allowed pair with 2 as one multiplier (both factors 2-9)
             for (let x = 2; x <= 9; x++) {
-              for (const [a, b] of [[2, x], [x, 2]]) {
+              for (const [a, b] of [[m, x], [x, m]]) {
                 if (results.some((r) => r.a === a && r.b === b)) continue;
                 pair = { a, b };
                 break;
@@ -97,43 +94,34 @@ export function generateProblems(opts: {
           }
         }
 
-        if (!pair) continue;
-
-        pushPair(pair.a, pair.b);
+        if (pair) pushPair(pair.a, pair.b);
       }
 
       blockIndex++;
-
-      // Safety: prevent infinite loop
-      if (blockIndex > 1000) break;
+      if (blockIndex > 1000) break; // Safety
     }
 
     return results.slice(0, count);
   }
 
-  // Determine ranges for full/limited/interactive modes.
-  // For range mode, top multiplicand uses rangeMin..rangeMax.
-  // Bottom multiplier defaults to 1..rangeMax unless rangeMin explicitly includes 0.
+  // Full/limited/interactive modes
   let topMin = rangeMin;
   let topMax = rangeMax;
   let bottomMin = rangeMin;
   let bottomMax = rangeMax;
 
   if (mode === "limited") {
-    // Keep provided range
     topMin = opts.rangeMin ?? 0;
     topMax = opts.rangeMax ?? 4;
-    bottomMin = Math.max(1, opts.rangeMin ?? 0); // bottom excludes 0 by default in range modes
+    bottomMin = Math.max(1, opts.rangeMin ?? 0);
     bottomMax = opts.rangeMax ?? 4;
   } else if (mode === "full" || mode === "interactive") {
     topMin = opts.rangeMin ?? 0;
     topMax = opts.rangeMax ?? 9;
-    // default bottomMin to 1 unless the top range includes 0 explicitly
     bottomMin = topMin === 0 ? 0 : Math.max(1, topMin);
     bottomMax = topMax;
   }
 
-  // Build pool of pairs respecting bottomMin/bottomMax
   const pairs: { a: number; b: number }[] = [];
   for (let a = topMin; a <= topMax; a++) {
     for (let b = bottomMin; b <= bottomMax; b++) {
@@ -141,16 +129,13 @@ export function generateProblems(opts: {
     }
   }
 
-  // Shuffle pool
   let pool = shuffle(pairs.slice());
 
-  // Caps for easy facts across the whole worksheet
-  const ZERO_CAP = 5; // max problems involving 0
-  const ONE_CAP = 8; // max problems involving 1
+  const ZERO_CAP = 5;
+  const ONE_CAP = 8;
   let zeroCount = 0;
   let oneCount = 0;
 
-  // Fill results while respecting caps; iterate over pool cyclically
   let attempts = 0;
   let idx = 0;
   while (results.length < count && attempts < 100000) {
@@ -162,15 +147,8 @@ export function generateProblems(opts: {
     const involvesZero = p.a === 0 || p.b === 0;
     const involvesOne = p.a === 1 || p.b === 1;
 
-    if (involvesZero && zeroCount >= ZERO_CAP) {
-      // skip this pair
-      continue;
-    }
-    if (involvesOne && oneCount >= ONE_CAP) {
-      continue;
-    }
-
-    // avoid duplicates
+    if (involvesZero && zeroCount >= ZERO_CAP) continue;
+    if (involvesOne && oneCount >= ONE_CAP) continue;
     if (results.some((r) => r.a === p.a && r.b === p.b)) continue;
 
     pushPair(p.a, p.b);
@@ -178,7 +156,6 @@ export function generateProblems(opts: {
     if (involvesOne) oneCount++;
   }
 
-  // If we couldn't fill due to caps, fill remaining slots with non-zero/non-one pairs, then if necessary relax caps
   if (results.length < count) {
     const fallbackPairs: { a: number; b: number }[] = [];
     for (let a = topMin; a <= topMax; a++) {
@@ -189,7 +166,6 @@ export function generateProblems(opts: {
       }
     }
     if (fallbackPairs.length === 0) {
-      // relax caps: allow any pairs
       for (let a = topMin; a <= topMax; a++) {
         for (let b = bottomMin; b <= bottomMax; b++) fallbackPairs.push({ a, b });
       }
@@ -200,7 +176,7 @@ export function generateProblems(opts: {
       const p = fallbackPairs[j % fallbackPairs.length];
       pushPair(p.a, p.b);
       j++;
-      if (j > fallbackPairs.length * 1000) break; // safety
+      if (j > fallbackPairs.length * 1000) break;
     }
   }
 

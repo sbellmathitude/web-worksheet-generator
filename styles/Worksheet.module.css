@@ -82,12 +82,21 @@
   justify-content: center;
 }
 
-/* Answer sheet: full size with red bold answers */
+/* Answer sheet: full size with smaller text, wider lines */
 .answerValue {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   color: #dc2626;
-  line-height: 1.02;
+  line-height: 1;
+}
+
+/* Answer sheet line extends full width */
+.answerLine {
+  width: 100%;
+  height: 1.5px;
+  background: #000;
+  margin-top: 2px;
+  box-sizing: border-box;
 }
 
 .header {

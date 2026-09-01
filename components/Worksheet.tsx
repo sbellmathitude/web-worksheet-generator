@@ -91,10 +91,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
 
-                        <div className={styles.rowGrid} aria-hidden>
-                          <div className={styles.leftCell} />
-                          <div className={styles.line} />
-                        </div>
+                        <div className={styles.answerLine} aria-hidden />
 
                         <div className={styles.answerValue}>{p.answer}</div>
                       </div>
