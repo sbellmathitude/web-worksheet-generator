@@ -49,12 +49,11 @@
   height: 100%;
 }
 
-/* Narrow the sign column so × sits close to digits */
+/* Use a stable inner layout and move the × farther right */
 .rowGrid {
-  width: 86%;
-  margin-left: auto;
+  width: 100%;
   display: grid;
-  grid-template-columns: 12px 1fr;
+  grid-template-columns: 16px 1fr;
   align-items: center;
 }
 
@@ -71,6 +70,7 @@
   font-size: 12px;
   line-height: 1;
   text-align: left;
+  transform: translateX(4px);
 }
 
 /* Separator */
