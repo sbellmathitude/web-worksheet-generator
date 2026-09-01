@@ -76,8 +76,8 @@
 /* Separator */
 .line {
   width: 100%;
-  height: 1px;
-  background: #000;
+  height: 0;
+  border-top: 1px solid #000;
   margin-top: 2px;
   box-sizing: border-box;
 }
@@ -100,8 +100,8 @@
 
 .answerLine {
   width: 100%;
-  height: 1px;
-  background: #000;
+  height: 0;
+  border-top: 1px solid #000;
   margin-top: 1px;
   box-sizing: border-box;
 }
