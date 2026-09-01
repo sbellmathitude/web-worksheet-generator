@@ -34,14 +34,15 @@ export function generateProblems(opts: {
 
   // SINGLE mode: fixed multiplier (M) chosen from 2..9 only.
   // Pattern: ABCABCABCC (10-item repeating block)
-  // A: M × 0, M × 1, M × 2, M × 3 (cycling)
-  // B: 0 × M, 1 × M, 2 × M, 3 × M (cycling)
+  // A: M × 0, M × 1, M × 2, M × 3 (always in order: 0,1,2,3,0,1,2,3,...)
+  // B: 0 × M, 1 × M, 2 × M, 3 × M (always in order: 0,1,2,3,0,1,2,3,...)
   // C: random mix involving M with other multiplicands 2–9 (no 0 or 1)
   if (mode === "single") {
     const m = Math.max(2, Math.min(9, opts.fixedMultiplier ?? 2));
     const pattern = ["A", "B", "C", "A", "B", "C", "A", "B", "C", "C"];
-
-    let blockIndex = 0;
+    
+    let aCycle = 0; // 0, 1, 2, 3 cycling for A rows
+    let bCycle = 0; // 0, 1, 2, 3 cycling for B rows
 
     while (results.length < count) {
       for (let i = 0; i < pattern.length && results.length < count; i++) {
@@ -49,13 +50,13 @@ export function generateProblems(opts: {
         let pair: { a: number; b: number } | null = null;
 
         if (token === "A") {
-          // A row: M × (0,1,2,3) cycling
-          const n = (blockIndex * pattern.length + i) % 4;
-          pair = { a: m, b: n };
+          // A row: M × aCycle, then increment
+          pair = { a: m, b: aCycle };
+          aCycle = (aCycle + 1) % 4;
         } else if (token === "B") {
-          // B row: (0,1,2,3) × M cycling
-          const n = (blockIndex * pattern.length + i) % 4;
-          pair = { a: n, b: m };
+          // B row: bCycle × M, then increment
+          pair = { a: bCycle, b: m };
+          bCycle = (bCycle + 1) % 4;
         } else {
           // C row: random involving M, other factor 2–9
           let attempts = 0;
@@ -96,9 +97,6 @@ export function generateProblems(opts: {
 
         if (pair) pushPair(pair.a, pair.b);
       }
-
-      blockIndex++;
-      if (blockIndex > 1000) break; // Safety
     }
 
     return results.slice(0, count);
