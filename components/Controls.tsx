@@ -118,9 +118,9 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
           return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
         })}
 
+        <option value="range:2-5">Range: 2–5</option>
         <option value="range:2-9">Range: 2–9</option>
         <option value="range:3-8">Range: 3–8</option>
-        <option value="range:0-9">Range: 0–9</option>
       </select>
 
       {/* Answer key checkbox (PDF only) */}
