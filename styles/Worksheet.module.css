@@ -43,7 +43,7 @@
 .vertical {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 2px;
   width: 0.5in;
   height: 100%;
@@ -113,6 +113,7 @@
   font-weight: 600;
   color: #dc2626;
   line-height: 1;
+  width: 100%;
   text-align: right;
 }
 
