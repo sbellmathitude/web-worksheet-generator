@@ -3,7 +3,9 @@ import Head from "next/head";
 import { Controls } from "../components/Controls";
 import { Worksheet } from "../components/Worksheet";
 import InteractiveWorksheet from "../components/InteractiveWorksheet";
-import { generateProblems, PracticeMode, Problem } from "../lib/generator";
+import { generateProblems, GenerateProblemsOptions, Operation, PracticeMode, Problem } from "../lib/generator";
+
+type ActivityMode = "pdf" | "interactive";
 
 export default function Home() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -11,9 +13,14 @@ export default function Home() {
   const [rows, setRows] = useState<number>(10);
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
   const [mode, setMode] = useState<PracticeMode>("full");
+  const [operation, setOperation] = useState<Operation>("multiplication");
+  const [activity, setActivity] = useState<ActivityMode>("pdf");
 
   function handleGenerate(opts: {
+    activity: ActivityMode;
     mode: PracticeMode;
+    skillId?: string;
+    operation?: GenerateProblemsOptions["operation"];
     fixedMultiplier?: number;
     rangeMin?: number;
     rangeMax?: number;
@@ -22,14 +29,30 @@ export default function Home() {
     cols: number;
     rows: number;
   }) {
-    const { mode: m, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
+    const {
+      activity,
+      mode: m,
+      skillId,
+      operation,
+      fixedMultiplier,
+      rangeMin,
+      rangeMax,
+      count,
+      includeAnswers,
+      cols,
+      rows,
+    } = opts;
     setCols(cols);
     setRows(rows);
     setIncludeAnswers(includeAnswers);
     setMode(m);
+    setOperation(operation ?? "multiplication");
+    setActivity(activity);
 
     let generated = generateProblems({
       mode: m,
+      skillId,
+      operation,
       count,
       fixedMultiplier,
       rangeMin,
@@ -108,10 +131,16 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              mode === 'interactive' ? (
+              activity === 'interactive' ? (
                 <InteractiveWorksheet problems={problems} />
               ) : (
-                <Worksheet problems={problems} cols={cols} rows={rows} includeAnswers={includeAnswers} />
+                <Worksheet
+                  problems={problems}
+                  cols={cols}
+                  rows={rows}
+                  includeAnswers={includeAnswers}
+                  operation={operation}
+                />
               )
             )}
           </div>

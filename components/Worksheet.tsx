@@ -1,17 +1,28 @@
 import React from "react";
 import styles from "../styles/Worksheet.module.css";
-import { Problem } from "../lib/generator";
+import { Operation, Problem } from "../lib/generator";
 
 type Props = {
   problems: Problem[];
   cols: number;
   rows: number;
   includeAnswers?: boolean;
+  operation?: Operation;
 };
 
-export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswers }) => {
+export const Worksheet: React.FC<Props> = ({
+  problems,
+  cols,
+  rows,
+  includeAnswers,
+  operation = "multiplication",
+}) => {
   const total = cols * rows;
   const filled = problems.slice(0, total);
+  const operations = new Set(filled.map((problem) => problem.operation ?? operation));
+  const worksheetOperation =
+    operations.size === 1 ? Array.from(operations)[0] ?? operation : undefined;
+  const title = getWorksheetTitle(worksheetOperation);
 
   return (
     <>
@@ -22,7 +33,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
               <img src="/images/logo.png" alt="MQ logo" className={styles.logoSmall} />
             </div>
             <div className={styles.headerCenter}>
-              <div className={styles.title}>Multiplication Practice</div>
+              <div className={styles.title}>{title}</div>
             </div>
             <div style={{ width: 60 }} aria-hidden />
           </div>
@@ -39,7 +50,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                       </div>
 
                       <div className={styles.middleRow} aria-hidden>
-                        <div className={styles.times}>×</div>
+                        <div className={styles.times}>{getOperationSymbol(p.operation ?? worksheetOperation ?? operation)}</div>
                         <div className={styles.bottomNumber}>{p.b}</div>
                       </div>
 
@@ -82,7 +93,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                         </div>
 
                         <div className={styles.middleRow} aria-hidden>
-                          <div className={styles.times}>×</div>
+                          <div className={styles.times}>{getOperationSymbol(p.operation ?? worksheetOperation ?? operation)}</div>
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
 
@@ -107,3 +118,35 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
     </>
   );
 };
+
+function getOperationSymbol(operation: Operation) {
+  switch (operation) {
+    case "addition":
+      return "+";
+    case "subtraction":
+      return "−";
+    case "division":
+      return "÷";
+    case "multiplication":
+    default:
+      return "×";
+  }
+}
+
+function getWorksheetTitle(operation?: Operation) {
+  if (!operation) {
+    return "Calculation Practice";
+  }
+
+  switch (operation) {
+    case "addition":
+      return "Addition Practice";
+    case "subtraction":
+      return "Subtraction Practice";
+    case "division":
+      return "Division Practice";
+    case "multiplication":
+    default:
+      return "Multiplication Practice";
+  }
+}
