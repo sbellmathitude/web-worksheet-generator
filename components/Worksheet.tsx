@@ -19,8 +19,9 @@ export const Worksheet: React.FC<Props> = ({
 }) => {
   const total = cols * rows;
   const filled = problems.slice(0, total);
-  const symbol = getOperationSymbol(operation);
-  const title = getWorksheetTitle(operation);
+  const renderedOperation = filled[0]?.operation ?? operation;
+  const symbol = getOperationSymbol(renderedOperation);
+  const title = getWorksheetTitle(renderedOperation);
 
   return (
     <>

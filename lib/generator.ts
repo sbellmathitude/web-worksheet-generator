@@ -191,9 +191,10 @@ export function getSkillDefinition(skillId?: string) {
 function resolveGenerationOptions(opts: GenerateProblemsOptions) {
   const skill = getSkillDefinition(opts.skillId);
   const operation = opts.operation ?? skill?.operation ?? "multiplication";
-  const skillRules =
-    skill && (!opts.operation || skill.operation === opts.operation) ? skill.rules : undefined;
-  const mode = opts.mode ?? skill?.practiceMode ?? "full";
+  const matchedSkill =
+    skill && (!opts.operation || skill.operation === opts.operation) ? skill : undefined;
+  const skillRules = matchedSkill?.rules;
+  const mode = opts.mode ?? matchedSkill?.practiceMode ?? "full";
   const rangeMin = opts.rangeMin ?? skillRules?.min ?? 0;
   const rangeMax = opts.rangeMax ?? skillRules?.max ?? 9;
   const fixedOperand = opts.fixedMultiplier ?? skillRules?.fixedOperand;
@@ -432,10 +433,6 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     }
   }
 
-  if (results.length === 0) {
-    return results;
-  }
-
   const fallbackPairs = candidates.filter((pair) => {
     const involvesZero = pair.a === 0 || pair.b === 0;
     const involvesOne = pair.a === 1 || pair.b === 1;
@@ -461,10 +458,33 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
   }
 
   let fallbackIndex = 0;
-  while (results.length < count) {
+  let stalledAttempts = 0;
+  while (results.length < count && stalledAttempts <= reusablePairs.length * 2) {
     const pair = reusablePairs[fallbackIndex % reusablePairs.length] ?? reusablePairs[0];
+    const involvesZero = pair.a === 0 || pair.b === 0;
+    const involvesOne = pair.a === 1 || pair.b === 1;
+
+    if (involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
+      fallbackIndex++;
+      stalledAttempts++;
+      continue;
+    }
+
+    if (involvesOne && oneCount >= DEFAULT_ONE_CAP) {
+      fallbackIndex++;
+      stalledAttempts++;
+      continue;
+    }
+
     results.push(createProblem(operation, pair.a, pair.b, results.length));
+    if (involvesZero) {
+      zeroCount++;
+    }
+    if (involvesOne) {
+      oneCount++;
+    }
     fallbackIndex++;
+    stalledAttempts = 0;
   }
 
   return results.slice(0, count);
