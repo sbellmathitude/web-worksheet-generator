@@ -191,11 +191,13 @@ export function getSkillDefinition(skillId?: string) {
 function resolveGenerationOptions(opts: GenerateProblemsOptions) {
   const skill = getSkillDefinition(opts.skillId);
   const operation = opts.operation ?? skill?.operation ?? "multiplication";
+  const skillRules =
+    skill && (!opts.operation || skill.operation === opts.operation) ? skill.rules : undefined;
   const mode = opts.mode ?? skill?.practiceMode ?? "full";
-  const rangeMin = opts.rangeMin ?? skill?.rules.min ?? 0;
-  const rangeMax = opts.rangeMax ?? skill?.rules.max ?? 9;
-  const fixedOperand = opts.fixedMultiplier ?? skill?.rules.fixedOperand;
-  const allowNegativeAnswers = opts.allowNegativeAnswers ?? skill?.rules.allowNegativeAnswers ?? false;
+  const rangeMin = opts.rangeMin ?? skillRules?.min ?? 0;
+  const rangeMax = opts.rangeMax ?? skillRules?.max ?? 9;
+  const fixedOperand = opts.fixedMultiplier ?? skillRules?.fixedOperand;
+  const allowNegativeAnswers = opts.allowNegativeAnswers ?? skillRules?.allowNegativeAnswers ?? false;
 
   return {
     skill,
@@ -434,9 +436,33 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     return results;
   }
 
+  const fallbackPairs = candidates.filter((pair) => {
+    const involvesZero = pair.a === 0 || pair.b === 0;
+    const involvesOne = pair.a === 1 || pair.b === 1;
+
+    if (involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
+      return false;
+    }
+
+    if (involvesOne && oneCount >= DEFAULT_ONE_CAP) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const reusablePairs =
+    fallbackPairs.length > 0
+      ? fallbackPairs
+      : candidates.filter((pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1);
+
+  if (reusablePairs.length === 0) {
+    return results.slice(0, count);
+  }
+
   let fallbackIndex = 0;
   while (results.length < count) {
-    const pair = candidates[fallbackIndex % candidates.length] ?? candidates[0];
+    const pair = reusablePairs[fallbackIndex % reusablePairs.length] ?? reusablePairs[0];
     results.push(createProblem(operation, pair.a, pair.b, results.length));
     fallbackIndex++;
   }

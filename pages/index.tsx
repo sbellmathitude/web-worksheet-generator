@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Controls } from "../components/Controls";
 import { Worksheet } from "../components/Worksheet";
 import InteractiveWorksheet from "../components/InteractiveWorksheet";
-import { generateProblems, GenerateProblemsOptions, PracticeMode, Problem } from "../lib/generator";
+import { generateProblems, GenerateProblemsOptions, Operation, PracticeMode, Problem } from "../lib/generator";
 
 export default function Home() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -11,6 +11,7 @@ export default function Home() {
   const [rows, setRows] = useState<number>(10);
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
   const [mode, setMode] = useState<PracticeMode>("full");
+  const [operation, setOperation] = useState<Operation>("multiplication");
 
   function handleGenerate(opts: {
     mode: PracticeMode;
@@ -29,6 +30,7 @@ export default function Home() {
     setRows(rows);
     setIncludeAnswers(includeAnswers);
     setMode(m);
+    setOperation(operation ?? "multiplication");
 
     let generated = generateProblems({
       mode: m,
@@ -115,7 +117,13 @@ export default function Home() {
               mode === 'interactive' ? (
                 <InteractiveWorksheet problems={problems} />
               ) : (
-                <Worksheet problems={problems} cols={cols} rows={rows} includeAnswers={includeAnswers} />
+                <Worksheet
+                  problems={problems}
+                  cols={cols}
+                  rows={rows}
+                  includeAnswers={includeAnswers}
+                  operation={operation}
+                />
               )
             )}
           </div>

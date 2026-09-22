@@ -7,12 +7,18 @@ type Props = {
   cols: number;
   rows: number;
   includeAnswers?: boolean;
+  operation?: Operation;
 };
 
-export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswers }) => {
+export const Worksheet: React.FC<Props> = ({
+  problems,
+  cols,
+  rows,
+  includeAnswers,
+  operation = "multiplication",
+}) => {
   const total = cols * rows;
   const filled = problems.slice(0, total);
-  const operation = filled.find(Boolean)?.operation ?? "multiplication";
   const symbol = getOperationSymbol(operation);
   const title = getWorksheetTitle(operation);
 
