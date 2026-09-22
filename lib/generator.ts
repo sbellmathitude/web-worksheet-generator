@@ -194,7 +194,7 @@ function resolveGenerationOptions(opts: GenerateProblemsOptions) {
   const matchedSkill =
     skill && (!opts.operation || skill.operation === opts.operation) ? skill : undefined;
   const skillRules = matchedSkill?.rules;
-  const mode = opts.mode ?? matchedSkill?.practiceMode ?? "full";
+
   const rangeMin = opts.rangeMin ?? skillRules?.min ?? 0;
   const rangeMax = opts.rangeMax ?? skillRules?.max ?? 9;
   const fixedOperand = opts.fixedMultiplier ?? skillRules?.fixedOperand;
@@ -203,7 +203,7 @@ function resolveGenerationOptions(opts: GenerateProblemsOptions) {
   return {
     skill: matchedSkill,
     operation,
-    mode,
+    mode: opts.mode,
     rangeMin,
     rangeMax,
     fixedOperand,
@@ -454,11 +454,17 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
         (problem) => problem.a === pair.a && problem.b === pair.b && problem.operation === operation
       )
   );
+  const uncappedPairs = capEligiblePairs.filter(
+    (pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1
+  );
+  const allowCapOverflow = fallbackPairs.length === 0 && uncappedPairs.length === 0;
 
   const reusablePairs =
     fallbackPairs.length > 0
       ? fallbackPairs
-      : capEligiblePairs.filter((pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1);
+      : uncappedPairs.length > 0
+        ? uncappedPairs
+        : candidates;
 
   if (reusablePairs.length === 0) {
     return results.slice(0, count);
@@ -471,13 +477,13 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     const involvesZero = pair.a === 0 || pair.b === 0;
     const involvesOne = pair.a === 1 || pair.b === 1;
 
-    if (involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
+    if (!allowCapOverflow && involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
       fallbackIndex++;
       stalledAttempts++;
       continue;
     }
 
-    if (involvesOne && oneCount >= DEFAULT_ONE_CAP) {
+    if (!allowCapOverflow && involvesOne && oneCount >= DEFAULT_ONE_CAP) {
       fallbackIndex++;
       stalledAttempts++;
       continue;

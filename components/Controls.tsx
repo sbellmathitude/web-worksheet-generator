@@ -3,6 +3,7 @@ import { GenerateProblemsOptions, MULTIPLICATION_SKILLS, PracticeMode } from "..
 
 type Props = {
   onGenerate: (opts: {
+    activity: "pdf" | "interactive";
     mode: PracticeMode;
     skillId?: string;
     operation?: GenerateProblemsOptions["operation"];
@@ -34,10 +35,10 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
 
   function handleGenerate() {
     const selectedSkill = MULTIPLICATION_SKILLS.find((skill) => skill.id === spec) ?? MULTIPLICATION_SKILLS[0];
-    const mode = activity === "interactive" ? "interactive" : selectedSkill.practiceMode;
 
     onGenerate({
-      mode,
+      activity,
+      mode: selectedSkill.practiceMode,
       skillId: selectedSkill.id,
       operation: selectedSkill.operation,
       fixedMultiplier: selectedSkill.rules.fixedOperand,

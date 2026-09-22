@@ -5,6 +5,8 @@ import { Worksheet } from "../components/Worksheet";
 import InteractiveWorksheet from "../components/InteractiveWorksheet";
 import { generateProblems, GenerateProblemsOptions, Operation, PracticeMode, Problem } from "../lib/generator";
 
+type ActivityMode = "pdf" | "interactive";
+
 export default function Home() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [cols, setCols] = useState<number>(10);
@@ -12,8 +14,10 @@ export default function Home() {
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
   const [mode, setMode] = useState<PracticeMode>("full");
   const [operation, setOperation] = useState<Operation>("multiplication");
+  const [activity, setActivity] = useState<ActivityMode>("pdf");
 
   function handleGenerate(opts: {
+    activity: ActivityMode;
     mode: PracticeMode;
     skillId?: string;
     operation?: GenerateProblemsOptions["operation"];
@@ -25,12 +29,25 @@ export default function Home() {
     cols: number;
     rows: number;
   }) {
-    const { mode: m, skillId, operation, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
+    const {
+      activity,
+      mode: m,
+      skillId,
+      operation,
+      fixedMultiplier,
+      rangeMin,
+      rangeMax,
+      count,
+      includeAnswers,
+      cols,
+      rows,
+    } = opts;
     setCols(cols);
     setRows(rows);
     setIncludeAnswers(includeAnswers);
     setMode(m);
     setOperation(operation ?? "multiplication");
+    setActivity(activity);
 
     let generated = generateProblems({
       mode: m,
@@ -114,7 +131,7 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              mode === 'interactive' ? (
+              activity === 'interactive' ? (
                 <InteractiveWorksheet problems={problems} />
               ) : (
                 <Worksheet
