@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Controls } from "../components/Controls";
 import { Worksheet } from "../components/Worksheet";
 import InteractiveWorksheet from "../components/InteractiveWorksheet";
-import { generateProblems, PracticeMode, Problem } from "../lib/generator";
+import { generateProblems, GenerateProblemsOptions, PracticeMode, Problem } from "../lib/generator";
 
 export default function Home() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -14,6 +14,8 @@ export default function Home() {
 
   function handleGenerate(opts: {
     mode: PracticeMode;
+    skillId?: string;
+    operation?: GenerateProblemsOptions["operation"];
     fixedMultiplier?: number;
     rangeMin?: number;
     rangeMax?: number;
@@ -22,7 +24,7 @@ export default function Home() {
     cols: number;
     rows: number;
   }) {
-    const { mode: m, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
+    const { mode: m, skillId, operation, fixedMultiplier, rangeMin, rangeMax, count, includeAnswers, cols, rows } = opts;
     setCols(cols);
     setRows(rows);
     setIncludeAnswers(includeAnswers);
@@ -30,6 +32,8 @@ export default function Home() {
 
     let generated = generateProblems({
       mode: m,
+      skillId,
+      operation,
       count,
       fixedMultiplier,
       rangeMin,

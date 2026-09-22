@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "../styles/Worksheet.module.css";
-import { Problem } from "../lib/generator";
+import { Operation, Problem } from "../lib/generator";
 
 type Props = {
   problems: Problem[];
@@ -12,6 +12,9 @@ type Props = {
 export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswers }) => {
   const total = cols * rows;
   const filled = problems.slice(0, total);
+  const operation = filled.find(Boolean)?.operation ?? "multiplication";
+  const symbol = getOperationSymbol(operation);
+  const title = getWorksheetTitle(operation);
 
   return (
     <>
@@ -22,7 +25,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
               <img src="/images/logo.png" alt="MQ logo" className={styles.logoSmall} />
             </div>
             <div className={styles.headerCenter}>
-              <div className={styles.title}>Multiplication Practice</div>
+              <div className={styles.title}>{title}</div>
             </div>
             <div style={{ width: 60 }} aria-hidden />
           </div>
@@ -39,7 +42,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                       </div>
 
                       <div className={styles.middleRow} aria-hidden>
-                        <div className={styles.times}>×</div>
+                        <div className={styles.times}>{symbol}</div>
                         <div className={styles.bottomNumber}>{p.b}</div>
                       </div>
 
@@ -82,7 +85,7 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
                         </div>
 
                         <div className={styles.middleRow} aria-hidden>
-                          <div className={styles.times}>×</div>
+                          <div className={styles.times}>{symbol}</div>
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
 
@@ -107,3 +110,31 @@ export const Worksheet: React.FC<Props> = ({ problems, cols, rows, includeAnswer
     </>
   );
 };
+
+function getOperationSymbol(operation: Operation) {
+  switch (operation) {
+    case "addition":
+      return "+";
+    case "subtraction":
+      return "−";
+    case "division":
+      return "÷";
+    case "multiplication":
+    default:
+      return "×";
+  }
+}
+
+function getWorksheetTitle(operation: Operation) {
+  switch (operation) {
+    case "addition":
+      return "Addition Practice";
+    case "subtraction":
+      return "Subtraction Practice";
+    case "division":
+      return "Division Practice";
+    case "multiplication":
+    default:
+      return "Multiplication Practice";
+  }
+}

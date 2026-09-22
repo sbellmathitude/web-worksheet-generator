@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { PracticeMode } from "../lib/generator";
+import { GenerateProblemsOptions, MULTIPLICATION_SKILLS, PracticeMode } from "../lib/generator";
 
 type Props = {
   onGenerate: (opts: {
     mode: PracticeMode;
+    skillId?: string;
+    operation?: GenerateProblemsOptions["operation"];
     fixedMultiplier?: number;
     rangeMin?: number;
     rangeMax?: number;
@@ -17,7 +19,7 @@ type Props = {
 
 export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
   const [activity, setActivity] = useState<"pdf" | "interactive">("pdf");
-  const [spec, setSpec] = useState<string>("range:2-9");
+  const [spec, setSpec] = useState<string>("multiplication-range-2-9");
   const [includeAnswers, setIncludeAnswers] = useState<boolean>(false);
 
   // all activities are 10x10
@@ -31,34 +33,21 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
   }, [activity]);
 
   function handleGenerate() {
-    // interpret spec
-    if (spec.startsWith("single:")) {
-      const m = Number(spec.split(":")[1]);
-      onGenerate({
-        mode: "single",
-        fixedMultiplier: m,
-        count,
-        includeAnswers,
-        cols,
-        rows
-      });
-    } else if (spec.startsWith("range:")) {
-      const parts = spec.split(":")[1].split("-");
-      const min = Number(parts[0]);
-      const max = Number(parts[1]);
-      onGenerate({
-        mode: "full",
-        rangeMin: min,
-        rangeMax: max,
-        count,
-        includeAnswers,
-        cols,
-        rows
-      });
-    } else {
-      // fallback
-      onGenerate({ mode: "full", count, includeAnswers, cols, rows });
-    }
+    const selectedSkill = MULTIPLICATION_SKILLS.find((skill) => skill.id === spec) ?? MULTIPLICATION_SKILLS[0];
+    const mode = activity === "interactive" ? "interactive" : selectedSkill.practiceMode;
+
+    onGenerate({
+      mode,
+      skillId: selectedSkill.id,
+      operation: selectedSkill.operation,
+      fixedMultiplier: selectedSkill.rules.fixedOperand,
+      rangeMin: selectedSkill.rules.min,
+      rangeMax: selectedSkill.rules.max,
+      count,
+      includeAnswers,
+      cols,
+      rows,
+    });
   }
 
   return (
@@ -112,14 +101,11 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
           cursor: "pointer"
         }}
       >
-        {/* single multiplier options (2..9 only) */}
-        {Array.from({ length: 8 }).map((_, i) => {
-          const val = i + 2;
-          return <option key={`s${val}`} value={`single:${val}`}>Single: {val}</option>;
-        })}
-
-        <option value="range:2-5">Range: 2–5</option>
-        <option value="range:2-9">Range: 2–9</option>
+        {MULTIPLICATION_SKILLS.map((skill) => (
+          <option key={skill.id} value={skill.id}>
+            {skill.label}
+          </option>
+        ))}
       </select>
 
       {/* Answer key checkbox (PDF only) */}
