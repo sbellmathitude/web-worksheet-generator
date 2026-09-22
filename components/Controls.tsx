@@ -35,6 +35,9 @@ export const Controls: React.FC<Props> = ({ onGenerate, compact = false }) => {
 
   function handleGenerate() {
     const selectedSkill = MULTIPLICATION_SKILLS.find((skill) => skill.id === spec) ?? MULTIPLICATION_SKILLS[0];
+    if (!selectedSkill) {
+      return;
+    }
 
     onGenerate({
       activity,

@@ -448,7 +448,7 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     return true;
   });
 
-  const fallbackPairs = capEligiblePairs.filter(
+  const unusedPairs = candidates.filter(
     (pair) =>
       !results.some(
         (problem) => problem.a === pair.a && problem.b === pair.b && problem.operation === operation
@@ -457,50 +457,60 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
   const uncappedPairs = capEligiblePairs.filter(
     (pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1
   );
-  const allowCapOverflow = fallbackPairs.length === 0 && uncappedPairs.length === 0;
 
-  const reusablePairs =
-    fallbackPairs.length > 0
-      ? fallbackPairs
-      : uncappedPairs.length > 0
-        ? uncappedPairs
-        : candidates;
-
-  if (reusablePairs.length === 0) {
-    return results.slice(0, count);
-  }
-
-  let fallbackIndex = 0;
-  let stalledAttempts = 0;
-  while (results.length < count && stalledAttempts <= reusablePairs.length * 2) {
-    const pair = reusablePairs[fallbackIndex % reusablePairs.length] ?? reusablePairs[0];
-    const involvesZero = pair.a === 0 || pair.b === 0;
-    const involvesOne = pair.a === 1 || pair.b === 1;
-
-    if (!allowCapOverflow && involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
-      fallbackIndex++;
-      stalledAttempts++;
-      continue;
-    }
-
-    if (!allowCapOverflow && involvesOne && oneCount >= DEFAULT_ONE_CAP) {
-      fallbackIndex++;
-      stalledAttempts++;
-      continue;
-    }
-
-    results.push(createProblem(operation, pair.a, pair.b, results.length));
-    if (involvesZero) {
-      zeroCount++;
-    }
-    if (involvesOne) {
-      oneCount++;
-    }
-    fallbackIndex++;
-    stalledAttempts = 0;
-  }
+  appendFromPool(unusedPairs, false);
+  appendFromPool(uncappedPairs, false);
+  appendFromPool(candidates, true);
 
   return results.slice(0, count);
+
+  function appendFromPool(pairs: Array<{ a: number; b: number }>, allowCapOverflow: boolean) {
+    if (pairs.length === 0 || results.length >= count) {
+      return;
+    }
+
+    let poolIndex = 0;
+    let stalledAttempts = 0;
+
+    while (results.length < count && stalledAttempts <= pairs.length * 2) {
+      const pair = pairs[poolIndex % pairs.length] ?? pairs[0];
+      const involvesZero = pair.a === 0 || pair.b === 0;
+      const involvesOne = pair.a === 1 || pair.b === 1;
+
+      if (
+        !allowCapOverflow &&
+        results.some(
+          (problem) => problem.a === pair.a && problem.b === pair.b && problem.operation === operation
+        )
+      ) {
+        poolIndex++;
+        stalledAttempts++;
+        continue;
+      }
+
+      if (!allowCapOverflow && involvesZero && zeroCount >= DEFAULT_ZERO_CAP) {
+        poolIndex++;
+        stalledAttempts++;
+        continue;
+      }
+
+      if (!allowCapOverflow && involvesOne && oneCount >= DEFAULT_ONE_CAP) {
+        poolIndex++;
+        stalledAttempts++;
+        continue;
+      }
+
+      results.push(createProblem(operation, pair.a, pair.b, results.length));
+      if (involvesZero) {
+        zeroCount++;
+      }
+      if (involvesOne) {
+        oneCount++;
+      }
+      poolIndex++;
+      stalledAttempts = 0;
+    }
+  }
 }
 
 export function generateProblems(opts: GenerateProblemsOptions): Problem[] {
@@ -511,8 +521,8 @@ export function generateProblems(opts: GenerateProblemsOptions): Problem[] {
       return generateMultiplicationSingleProblems(count, fixedOperand ?? 2);
     }
 
-    const normalizedRangeMin = mode === "limited" ? opts.rangeMin ?? 0 : rangeMin;
-    const normalizedRangeMax = mode === "limited" ? opts.rangeMax ?? 4 : rangeMax;
+    const normalizedRangeMin = opts.rangeMin ?? 0;
+    const normalizedRangeMax = opts.rangeMax ?? (mode === "limited" ? 4 : 9);
     return generateMultiplicationRangeProblems(mode, count, normalizedRangeMin, normalizedRangeMax);
   }
 
