@@ -19,9 +19,10 @@ export const Worksheet: React.FC<Props> = ({
 }) => {
   const total = cols * rows;
   const filled = problems.slice(0, total);
-  const renderedOperation = filled[0]?.operation ?? operation;
-  const symbol = getOperationSymbol(renderedOperation);
-  const title = getWorksheetTitle(renderedOperation);
+  const operations = new Set(filled.map((problem) => problem.operation ?? operation));
+  const worksheetOperation =
+    operations.size === 1 ? Array.from(operations)[0] ?? operation : undefined;
+  const title = getWorksheetTitle(worksheetOperation);
 
   return (
     <>
@@ -49,7 +50,7 @@ export const Worksheet: React.FC<Props> = ({
                       </div>
 
                       <div className={styles.middleRow} aria-hidden>
-                        <div className={styles.times}>{symbol}</div>
+                        <div className={styles.times}>{getOperationSymbol(p.operation ?? worksheetOperation ?? operation)}</div>
                         <div className={styles.bottomNumber}>{p.b}</div>
                       </div>
 
@@ -92,7 +93,7 @@ export const Worksheet: React.FC<Props> = ({
                         </div>
 
                         <div className={styles.middleRow} aria-hidden>
-                          <div className={styles.times}>{symbol}</div>
+                          <div className={styles.times}>{getOperationSymbol(p.operation ?? worksheetOperation ?? operation)}</div>
                           <div className={styles.bottomNumber}>{p.b}</div>
                         </div>
 
@@ -132,7 +133,11 @@ function getOperationSymbol(operation: Operation) {
   }
 }
 
-function getWorksheetTitle(operation: Operation) {
+function getWorksheetTitle(operation?: Operation) {
+  if (!operation) {
+    return "Calculation Practice";
+  }
+
   switch (operation) {
     case "addition":
       return "Addition Practice";

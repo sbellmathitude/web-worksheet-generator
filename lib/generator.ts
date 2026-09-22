@@ -201,7 +201,7 @@ function resolveGenerationOptions(opts: GenerateProblemsOptions) {
   const allowNegativeAnswers = opts.allowNegativeAnswers ?? skillRules?.allowNegativeAnswers ?? false;
 
   return {
-    skill,
+    skill: matchedSkill,
     operation,
     mode,
     rangeMin,
@@ -433,7 +433,7 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     }
   }
 
-  const fallbackPairs = candidates.filter((pair) => {
+  const capEligiblePairs = candidates.filter((pair) => {
     const involvesZero = pair.a === 0 || pair.b === 0;
     const involvesOne = pair.a === 1 || pair.b === 1;
 
@@ -448,10 +448,17 @@ function generateGenericProblems(operation: Operation, count: number, rangeMin: 
     return true;
   });
 
+  const fallbackPairs = capEligiblePairs.filter(
+    (pair) =>
+      !results.some(
+        (problem) => problem.a === pair.a && problem.b === pair.b && problem.operation === operation
+      )
+  );
+
   const reusablePairs =
     fallbackPairs.length > 0
       ? fallbackPairs
-      : candidates.filter((pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1);
+      : capEligiblePairs.filter((pair) => pair.a !== 0 && pair.b !== 0 && pair.a !== 1 && pair.b !== 1);
 
   if (reusablePairs.length === 0) {
     return results.slice(0, count);
