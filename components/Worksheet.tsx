@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "../styles/Worksheet.module.css";
 import { Operation, Problem } from "../lib/generator";
+import { getOperationSymbol, getWorksheetTitle } from "../lib/operations";
 
 type Props = {
   problems: Problem[];
@@ -117,36 +118,4 @@ export const Worksheet: React.FC<Props> = ({
       )}
     </>
   );
-};
-
-function getOperationSymbol(operation: Operation) {
-  switch (operation) {
-    case "addition":
-      return "+";
-    case "subtraction":
-      return "−";
-    case "division":
-      return "÷";
-    case "multiplication":
-    default:
-      return "×";
-  }
-}
-
-function getWorksheetTitle(operation?: Operation) {
-  if (!operation) {
-    return "Calculation Practice";
-  }
-
-  switch (operation) {
-    case "addition":
-      return "Addition Practice";
-    case "subtraction":
-      return "Subtraction Practice";
-    case "division":
-      return "Division Practice";
-    case "multiplication":
-    default:
-      return "Multiplication Practice";
-  }
 }
