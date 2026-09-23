@@ -208,7 +208,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
                     }`.trim()}
                     aria-live="polite"
                   >
-                    {cellState.feedback?.message ?? <span className={styles.srOnly}>No feedback yet.</span>}
+                    {cellState.feedback?.message ?? ""}
                   </p>
                 </form>
               </div>
