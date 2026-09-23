@@ -1,23 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { Problem } from "../lib/generator";
+import type { Operation, Problem } from "../lib/generator";
 import {
-  checkAnswer,
   createInitialInteractiveState,
+  getLiveAnswerResult,
   InteractiveCellState,
 } from "../lib/interactiveWorksheet";
 import { getOperationSymbol, getWorksheetTitle } from "../lib/operations";
-import {
-  getRandomPixelArtPattern,
-  getRewardPixelToken,
-  PIXEL_ART_COLUMNS,
-  PIXEL_ART_ROWS,
-  PIXEL_TOKEN_COLORS,
-  PixelArtPattern,
-} from "../lib/pixelArt";
 import styles from "../styles/InteractiveWorksheet.module.css";
 
 type Props = {
   problems: Problem[];
+  cols: number;
+  rows: number;
+  operation?: Operation;
   sessionId: number;
 };
 
@@ -27,194 +22,129 @@ function buildInitialState(problems: Problem[]) {
   ) as Record<string, InteractiveCellState>;
 }
 
-export default function InteractiveWorksheet({ problems, sessionId }: Props) {
+export default function InteractiveWorksheet({
+  problems,
+  cols,
+  rows,
+  operation = "multiplication",
+  sessionId,
+}: Props) {
   const problemIdsKey = useMemo(() => problems.map((problem) => problem.id).join("|"), [problems]);
   const [cellStates, setCellStates] = useState<Record<string, InteractiveCellState>>(() =>
     buildInitialState(problems)
   );
-  const [rewardPattern, setRewardPattern] = useState<PixelArtPattern>(() => getRandomPixelArtPattern());
 
   useEffect(() => {
     setCellStates(buildInitialState(problems));
-    setRewardPattern(getRandomPixelArtPattern());
   }, [problemIdsKey, sessionId]);
 
+  const total = cols * rows;
+  const filled = problems.slice(0, total);
   const solvedCount = useMemo(
-    () => problems.filter((problem) => cellStates[problem.id]?.isSolved).length,
-    [cellStates, problems]
+    () => filled.filter((problem) => cellStates[problem.id]?.isSolved).length,
+    [cellStates, filled]
   );
-  const totalCount = problems.length;
-  const isComplete = totalCount > 0 && solvedCount === totalCount;
-  const operations = new Set(problems.map((problem) => problem.operation ?? "multiplication"));
-  const worksheetOperation = operations.size === 1 ? Array.from(operations)[0] : undefined;
+  const operations = new Set(filled.map((problem) => problem.operation ?? operation));
+  const worksheetOperation =
+    operations.size === 1 ? Array.from(operations)[0] ?? operation : undefined;
   const title = getWorksheetTitle(worksheetOperation);
-  const rewardLabel = isComplete ? rewardPattern.label : "mystery picture";
-  const rewardAriaLabel = `Reward picture progress: ${solvedCount} of ${totalCount} pixels revealed. Picture: ${rewardLabel}.`;
 
-  function updateCellState(problemId: string, updater: (current: InteractiveCellState) => InteractiveCellState) {
-    setCellStates((current) => ({
-      ...current,
-      [problemId]: updater(current[problemId] ?? createInitialInteractiveState()),
-    }));
-  }
+  function handleValueChange(problem: Problem, value: string) {
+    setCellStates((current) => {
+      const existing = current[problem.id] ?? createInitialInteractiveState();
+      if (existing.isSolved) {
+        return current;
+      }
 
-  function handleValueChange(problemId: string, value: string) {
-    updateCellState(problemId, (current) => ({
-      ...current,
-      value,
-      feedback: current.isSolved ? current.feedback : undefined,
-    }));
-  }
-
-  function handleSubmit(problem: Problem) {
-    const currentState = cellStates[problem.id] ?? createInitialInteractiveState();
-    if (currentState.isSolved) {
-      return;
-    }
-
-    const result = checkAnswer(currentState.value, problem.answer);
-    if (result.status === "correct") {
-      updateCellState(problem.id, () => ({
-        value: result.normalizedValue,
-        isSolved: true,
-        feedback: {
-          tone: "success",
-          message: result.message,
-        },
-      }));
-      return;
-    }
-
-    updateCellState(problem.id, (existing) => ({
-      ...existing,
-      feedback: {
-        tone: "error",
-        message: result.message,
-      },
-    }));
+      const nextState = getLiveAnswerResult(value, problem.answer);
+      return {
+        ...current,
+        [problem.id]:
+          nextState.status === "correct"
+            ? {
+                value: nextState.normalizedValue,
+                isSolved: true,
+              }
+            : {
+                ...existing,
+                value,
+              },
+      };
+    });
   }
 
   return (
     <section className={styles.interactiveSheet}>
       <div className={styles.summaryPanel}>
-        <div className={styles.summaryCopy}>
+        <div>
           <p className={styles.eyebrow}>Interactive practice</p>
           <h2 className={styles.title}>{title}</h2>
           <p className={styles.description}>
-            Solve each fact to reveal one pixel of the hidden picture. Wrong answers stay unsolved, so
-            you can keep trying until every square is complete.
-          </p>
-          <div className={styles.progressRow}>
-            <span className={styles.progressBadge}>
-              {solvedCount} / {totalCount} solved
-            </span>
-            {isComplete && <span className={styles.completionBadge}>All {totalCount} problems solved!</span>}
-          </div>
-          <p className={styles.completionMessage}>
-            {isComplete
-              ? `Great work—you revealed the ${rewardPattern.label}.`
-              : "Tip: press Enter in any answer box or use the Check button for that cell."}
+            Type each answer directly in the grid. Correct answers lock in right away.
           </p>
         </div>
-
-        <div className={styles.rewardPanel}>
-          <div
-            className={styles.rewardGrid}
-            role="img"
-            aria-label={rewardAriaLabel}
-          >
-            {Array.from({ length: PIXEL_ART_COLUMNS * PIXEL_ART_ROWS }).map((_, index) => {
-              const isSolved = problems[index] ? cellStates[problems[index].id]?.isSolved : false;
-              const color = isSolved
-                ? PIXEL_TOKEN_COLORS[getRewardPixelToken(rewardPattern, index)]
-                : undefined;
-
-              return (
-                <div
-                  key={`${rewardPattern.id}-${index}`}
-                  className={`${styles.rewardPixel} ${isSolved ? styles.rewardPixelSolved : ""}`.trim()}
-                  style={color ? { backgroundColor: color } : undefined}
-                />
-              );
-            })}
-          </div>
-          <p className={styles.patternLabel}>
-            {isComplete ? (
-              <>
-                Revealed picture: <strong>{rewardPattern.label}</strong>
-              </>
-            ) : (
-              "Each correct answer reveals one more pixel."
-            )}
-          </p>
+        <div className={styles.progressBadge} aria-live="polite">
+          {solvedCount} / {filled.length} correct
         </div>
       </div>
 
-      <div className={styles.gridScroller}>
-        <div className={styles.problemGrid}>
-          {problems.map((problem, index) => {
-            const cellState = cellStates[problem.id] ?? createInitialInteractiveState();
-            const idSuffix = problem.id.replace(/[^a-zA-Z0-9_-]/g, "-");
-            const answerInputId = `interactive-answer-${idSuffix}`;
-            const answerFeedbackId = `interactive-feedback-${idSuffix}`;
-            const operation = problem.operation ?? "multiplication";
+      <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        {Array.from({ length: total }).map((_, index) => {
+          const problem = filled[index];
+          if (!problem) {
+            return <div key={`empty-${index}`} className={styles.emptyCell} aria-hidden />;
+          }
 
-            return (
-              <div
-                key={problem.id}
-                className={`${styles.problemCard} ${cellState.isSolved ? styles.problemCardSolved : ""}`.trim()}
-              >
-                <p className={styles.cellNumber}>Problem {index + 1}</p>
-                <p className={styles.expression}>
-                  {problem.a} {getOperationSymbol(operation)} {problem.b}
-                </p>
+          const cellState = cellStates[problem.id] ?? createInitialInteractiveState();
+          const liveAnswer = cellState.isSolved
+            ? { status: "correct" as const, normalizedValue: cellState.value }
+            : getLiveAnswerResult(cellState.value, problem.answer);
+          const isIncorrect = liveAnswer.status === "incorrect" || liveAnswer.status === "invalid";
+          const isSolved = cellState.isSolved;
+          const answerInputId = `interactive-answer-${problem.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+          const cellOperation = problem.operation ?? worksheetOperation ?? operation;
 
-                <form
-                  className={styles.inputForm}
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    handleSubmit(problem);
-                  }}
+          return (
+            <div
+              key={problem.id}
+              className={`${styles.cell} ${isSolved ? styles.cellSolved : ""} ${
+                isIncorrect ? styles.cellIncorrect : ""
+              }`.trim()}
+            >
+              <label className={styles.expression} htmlFor={answerInputId}>
+                <span>{problem.a}</span>
+                <span className={styles.operator}>{getOperationSymbol(cellOperation)}</span>
+                <span>{problem.b}</span>
+                <span>=</span>
+              </label>
+
+              <div className={styles.answerRow}>
+                <input
+                  id={answerInputId}
+                  className={`${styles.input} ${isSolved ? styles.inputSolved : ""} ${
+                    isIncorrect ? styles.inputIncorrect : ""
+                  }`.trim()}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="-?[0-9]*"
+                  autoComplete="off"
+                  value={cellState.value}
+                  onChange={(event) => handleValueChange(problem, event.target.value)}
+                  aria-invalid={isIncorrect}
+                  readOnly={isSolved}
+                />
+                <span
+                  className={`${styles.status} ${isSolved ? styles.statusSolved : ""} ${
+                    isIncorrect ? styles.statusIncorrect : ""
+                  }`.trim()}
+                  aria-hidden={!isSolved && !isIncorrect}
                 >
-                  <label className={styles.inputLabel} htmlFor={answerInputId}>
-                    Answer for problem {index + 1}: {problem.a} {getOperationSymbol(operation)} {problem.b}
-                  </label>
-                  <div className={styles.inputRow}>
-                    <input
-                      id={answerInputId}
-                      className={`${styles.input} ${cellState.isSolved ? styles.inputSolved : ""}`.trim()}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="-?[0-9]*"
-                      autoComplete="off"
-                      value={cellState.value}
-                      onChange={(event) => handleValueChange(problem.id, event.target.value)}
-                      aria-describedby={answerFeedbackId}
-                      aria-invalid={cellState.feedback?.tone === "error"}
-                      readOnly={cellState.isSolved}
-                    />
-                    <button className={styles.checkButton} type="submit" disabled={cellState.isSolved}>
-                      {cellState.isSolved ? "Done" : "Check"}
-                    </button>
-                  </div>
-                  <p
-                    id={answerFeedbackId}
-                    className={`${styles.feedback} ${
-                      cellState.feedback?.tone === "success"
-                        ? styles.feedbackSuccess
-                        : cellState.feedback?.tone === "error"
-                          ? styles.feedbackError
-                          : ""
-                    }`.trim()}
-                    aria-live="polite"
-                  >
-                    {cellState.feedback?.message ?? ""}
-                  </p>
-                </form>
+                  {isSolved ? "✓" : isIncorrect ? "✕" : ""}
+                </span>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
