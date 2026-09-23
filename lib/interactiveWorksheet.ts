@@ -1,16 +1,11 @@
-export type AnswerCheckResult =
-  | { status: "blank"; message: string }
-  | { status: "invalid"; message: string }
-  | { status: "incorrect"; message: string }
-  | { status: "correct"; message: string; normalizedValue: string };
+export type LiveAnswerResult =
+  | { status: "blank" | "typing" }
+  | { status: "invalid" | "incorrect" }
+  | { status: "correct"; normalizedValue: string };
 
 export type InteractiveCellState = {
   value: string;
   isSolved: boolean;
-  feedback?: {
-    tone: "error" | "success";
-    message: string;
-  };
 };
 
 export function createInitialInteractiveState(): InteractiveCellState {
@@ -20,34 +15,28 @@ export function createInitialInteractiveState(): InteractiveCellState {
   };
 }
 
-export function checkAnswer(rawValue: string, expectedAnswer: number): AnswerCheckResult {
+export function getLiveAnswerResult(rawValue: string, expectedAnswer: number): LiveAnswerResult {
   const trimmedValue = rawValue.trim();
+  const expectedValue = String(expectedAnswer);
 
   if (!trimmedValue) {
+    return { status: "blank" };
+  }
+
+  if (trimmedValue === expectedValue) {
     return {
-      status: "blank",
-      message: "Enter a number first.",
+      status: "correct",
+      normalizedValue: expectedValue,
     };
   }
 
-  if (!/^-?\d+$/.test(trimmedValue)) {
-    return {
-      status: "invalid",
-      message: "Use digits only, then try again.",
-    };
+  if (!/^-?\d*$/.test(trimmedValue)) {
+    return { status: "invalid" };
   }
 
-  const submittedAnswer = Number(trimmedValue);
-  if (submittedAnswer !== expectedAnswer) {
-    return {
-      status: "incorrect",
-      message: "Not quite—try again!",
-    };
+  if (expectedValue.startsWith(trimmedValue) || trimmedValue.length < expectedValue.length) {
+    return { status: "typing" };
   }
 
-  return {
-    status: "correct",
-    message: "Correct!",
-    normalizedValue: trimmedValue,
-  };
+  return { status: "incorrect" };
 }

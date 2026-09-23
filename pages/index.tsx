@@ -134,7 +134,13 @@ export default function Home() {
               </div>
             ) : (
               activity === 'interactive' ? (
-                <InteractiveWorksheet problems={problems} sessionId={interactiveSessionId} />
+                <InteractiveWorksheet
+                  problems={problems}
+                  cols={cols}
+                  rows={rows}
+                  operation={operation}
+                  sessionId={interactiveSessionId}
+                />
               ) : (
                 <Worksheet
                   problems={problems}
