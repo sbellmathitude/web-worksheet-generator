@@ -1,8 +1,14 @@
 .interactiveSheet {
-  display: grid;
-  gap: 20px;
+  --interactive-offset: clamp(180px, 26vh, 280px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 20px);
   max-width: 1320px;
-  margin: 0 auto 32px;
+  margin: 0 auto 24px;
+  height: calc(100vh - var(--interactive-offset));
+  height: calc(100dvh - var(--interactive-offset));
+  min-height: 320px;
+  overflow: hidden;
 }
 
 .summaryPanel {
@@ -15,6 +21,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  flex: 0 0 auto;
 }
 
 .eyebrow {
@@ -54,15 +61,31 @@
   white-space: nowrap;
 }
 
+.activityBody {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(180px, 1fr);
+  gap: clamp(10px, 1.2vw, 18px);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gridPanel {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .grid {
   display: grid;
-  gap: 10px;
+  gap: clamp(4px, 0.65vw, 10px);
+  height: 100%;
+  min-height: 0;
 }
 
 .cell,
 .emptyCell {
-  min-height: 100px;
-  padding: 10px;
+  min-height: 0;
+  padding: clamp(4px, 0.7vw, 10px);
   border-radius: 14px;
 }
 
@@ -96,7 +119,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
-  width: min(100%, 5rem);
+  width: min(100%, clamp(2.8rem, 5.4vw, 5rem));
 }
 
 .expression {
@@ -106,7 +129,7 @@
   gap: 2px;
   width: 100%;
   color: #111827;
-  font-size: 1.05rem;
+  font-size: clamp(0.72rem, 1.15vw, 1.05rem);
   font-weight: 400;
 }
 
@@ -133,7 +156,7 @@
 .topNumber,
 .bottomNumber,
 .operator {
-  font-size: 1.05rem;
+  font-size: clamp(0.72rem, 1.15vw, 1.05rem);
   line-height: 1;
   font-weight: 400;
 }
@@ -159,22 +182,22 @@
 .answerRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
+  gap: clamp(3px, 0.45vw, 6px);
   align-items: center;
   width: 100%;
-  min-height: 2rem;
+  min-height: clamp(1.2rem, 2.2vw, 2rem);
 }
 
 .input {
   width: 100%;
   min-width: 0;
-  min-height: 2rem;
+  min-height: clamp(1.2rem, 2.2vw, 2rem);
   padding: 0 2px;
   border: 0;
   border-radius: 0;
   color: #111827;
   background: transparent;
-  font-size: 1rem;
+  font-size: clamp(0.72rem, 1.05vw, 1rem);
   font-weight: 400;
   text-align: right;
 }
@@ -199,11 +222,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: clamp(18px, 2vw, 28px);
+  height: clamp(18px, 2vw, 28px);
   border-radius: 999px;
   color: transparent;
-  font-size: 1rem;
+  font-size: clamp(0.75rem, 1vw, 1rem);
   font-weight: 700;
 }
 
@@ -217,10 +240,100 @@
   color: #ffffff;
 }
 
+.rewardPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+}
+
+.rewardTitle {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  font-weight: 700;
+}
+
+.rewardDescription {
+  margin: 6px 0 10px;
+  color: #4b5563;
+  font-size: clamp(0.74rem, 0.9vw, 0.88rem);
+}
+
+.rewardCanvas {
+  width: 100%;
+  max-width: min(100%, 320px);
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
+}
+
+.rewardGrid {
+  display: grid;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: clamp(2px, 0.32vw, 4px);
+  width: 100%;
+  height: 100%;
+}
+
+.rewardPixel {
+  border-radius: clamp(2px, 0.4vw, 5px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  opacity: 0.35;
+  transform: scale(0.9);
+  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.rewardPixelAvailable {
+  opacity: 0.55;
+}
+
+.rewardPixelUnused {
+  opacity: 0.2;
+}
+
+.rewardPixelRevealed {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.rewardComplete {
+  margin: 10px 0 0;
+  color: #166534;
+  font-size: clamp(0.76rem, 0.95vw, 0.9rem);
+  font-weight: 600;
+}
+
 @media (max-width: 900px) {
+  .interactiveSheet {
+    --interactive-offset: clamp(180px, 40vh, 300px);
+  }
+
   .summaryPanel {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px;
+  }
+
+  .activityBody {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .rewardPanel {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .rewardCanvas {
+    width: clamp(98px, 27vw, 150px);
+    margin: 0 0 0 auto;
   }
 
   .grid {
@@ -229,11 +342,14 @@
 
   .cell,
   .emptyCell {
-    min-height: 88px;
-    padding: 8px;
+    padding: clamp(4px, 1.2vw, 8px);
   }
 
   .problemStack {
-    width: min(100%, 4.5rem);
+    width: min(100%, clamp(2.4rem, 10vw, 4.5rem));
+  }
+
+  .rewardDescription {
+    margin-bottom: 0;
   }
 }
