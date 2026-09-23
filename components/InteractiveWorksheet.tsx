@@ -28,6 +28,7 @@ function buildInitialState(problems: Problem[]) {
 }
 
 export default function InteractiveWorksheet({ problems, sessionId }: Props) {
+  const problemIdsKey = useMemo(() => problems.map((problem) => problem.id).join("|"), [problems]);
   const [cellStates, setCellStates] = useState<Record<string, InteractiveCellState>>(() =>
     buildInitialState(problems)
   );
@@ -36,7 +37,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
   useEffect(() => {
     setCellStates(buildInitialState(problems));
     setRewardPattern(getRandomPixelArtPattern());
-  }, [sessionId]);
+  }, [problemIdsKey, sessionId]);
 
   const solvedCount = useMemo(
     () => problems.filter((problem) => cellStates[problem.id]?.isSolved).length,
@@ -48,6 +49,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
   const worksheetOperation = operations.size === 1 ? Array.from(operations)[0] : undefined;
   const title = getWorksheetTitle(worksheetOperation);
   const rewardLabel = isComplete ? rewardPattern.label : "mystery picture";
+  const rewardAriaLabel = `Reward picture progress: ${solvedCount} of ${totalCount} pixels revealed. Picture: ${rewardLabel}.`;
 
   function updateCellState(problemId: string, updater: (current: InteractiveCellState) => InteractiveCellState) {
     setCellStates((current) => ({
@@ -119,7 +121,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
           <div
             className={styles.rewardGrid}
             role="img"
-            aria-label={`Reward picture: a ${rewardLabel}. Solved problems reveal its colors.`}
+            aria-label={rewardAriaLabel}
           >
             {Array.from({ length: PIXEL_ART_COLUMNS * PIXEL_ART_ROWS }).map((_, index) => {
               const isSolved = problems[index] ? cellStates[problems[index].id]?.isSolved : false;
