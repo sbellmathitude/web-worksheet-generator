@@ -111,36 +111,44 @@ export default function InteractiveWorksheet({
                 isIncorrect ? styles.cellIncorrect : ""
               }`.trim()}
             >
-              <label className={styles.expression} htmlFor={answerInputId}>
-                <span>{problem.a}</span>
-                <span className={styles.operator}>{getOperationSymbol(cellOperation)}</span>
-                <span>{problem.b}</span>
-                <span>=</span>
-              </label>
+              <div className={styles.problemStack}>
+                <label className={styles.expression} htmlFor={answerInputId}>
+                  <span className={styles.topRow}>
+                    <span className={styles.topNumber}>{problem.a}</span>
+                  </span>
+                  <span className={styles.middleRow}>
+                    <span className={styles.operator}>{getOperationSymbol(cellOperation)}</span>
+                    <span className={styles.bottomNumber}>{problem.b}</span>
+                  </span>
+                  <span className={styles.lineRow} aria-hidden>
+                    <span className={styles.line} />
+                  </span>
+                </label>
 
-              <div className={styles.answerRow}>
-                <input
-                  id={answerInputId}
-                  className={`${styles.input} ${isSolved ? styles.inputSolved : ""} ${
-                    isIncorrect ? styles.inputIncorrect : ""
-                  }`.trim()}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="-?[0-9]*"
-                  autoComplete="off"
-                  value={cellState.value}
-                  onChange={(event) => handleValueChange(problem, event.target.value)}
-                  aria-invalid={isIncorrect}
-                  readOnly={isSolved}
-                />
-                <span
-                  className={`${styles.status} ${isSolved ? styles.statusSolved : ""} ${
-                    isIncorrect ? styles.statusIncorrect : ""
-                  }`.trim()}
-                  aria-hidden={!isSolved && !isIncorrect}
-                >
-                  {isSolved ? "✓" : isIncorrect ? "✕" : ""}
-                </span>
+                <div className={styles.answerRow}>
+                  <input
+                    id={answerInputId}
+                    className={`${styles.input} ${isSolved ? styles.inputSolved : ""} ${
+                      isIncorrect ? styles.inputIncorrect : ""
+                    }`.trim()}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="-?[0-9]*"
+                    autoComplete="off"
+                    value={cellState.value}
+                    onChange={(event) => handleValueChange(problem, event.target.value)}
+                    aria-invalid={isIncorrect}
+                    readOnly={isSolved}
+                  />
+                  <span
+                    className={`${styles.status} ${isSolved ? styles.statusSolved : ""} ${
+                      isIncorrect ? styles.statusIncorrect : ""
+                    }`.trim()}
+                    aria-hidden={!isSolved && !isIncorrect}
+                  >
+                    {isSolved ? "✓" : isIncorrect ? "✕" : ""}
+                  </span>
+                </div>
               </div>
             </div>
           );
