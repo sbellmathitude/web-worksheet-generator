@@ -36,7 +36,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
   useEffect(() => {
     setCellStates(buildInitialState(problems));
     setRewardPattern(getRandomPixelArtPattern());
-  }, [problems, sessionId]);
+  }, [sessionId]);
 
   const solvedCount = useMemo(
     () => problems.filter((problem) => cellStates[problem.id]?.isSolved).length,
@@ -181,7 +181,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
                       id={answerInputId}
                       className={`${styles.input} ${cellState.isSolved ? styles.inputSolved : ""}`.trim()}
                       type="text"
-                      inputMode={operation === "subtraction" ? "text" : "numeric"}
+                      inputMode="decimal"
                       pattern="-?[0-9]*"
                       autoComplete="off"
                       value={cellState.value}
