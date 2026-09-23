@@ -6,6 +6,13 @@ import {
   InteractiveCellState,
 } from "../lib/interactiveWorksheet";
 import { getOperationSymbol, getWorksheetTitle } from "../lib/operations";
+import {
+  getRandomPixelArtPattern,
+  getRewardPixelToken,
+  PIXEL_ART_COLUMNS,
+  PIXEL_ART_ROWS,
+  PIXEL_TOKEN_COLORS,
+} from "../lib/pixelArt";
 import styles from "../styles/InteractiveWorksheet.module.css";
 
 type Props = {
@@ -33,9 +40,11 @@ export default function InteractiveWorksheet({
   const [cellStates, setCellStates] = useState<Record<string, InteractiveCellState>>(() =>
     buildInitialState(problems)
   );
+  const [rewardPattern, setRewardPattern] = useState(() => getRandomPixelArtPattern());
 
   useEffect(() => {
     setCellStates(buildInitialState(problems));
+    setRewardPattern(getRandomPixelArtPattern());
   }, [problemIdsKey, sessionId]);
 
   const total = cols * rows;
@@ -48,6 +57,8 @@ export default function InteractiveWorksheet({
   const worksheetOperation =
     operations.size === 1 ? Array.from(operations)[0] ?? operation : undefined;
   const title = getWorksheetTitle(worksheetOperation);
+  const rewardCellCount = PIXEL_ART_COLUMNS * PIXEL_ART_ROWS;
+  const isComplete = filled.length > 0 && solvedCount === filled.length;
 
   function handleValueChange(problem: Problem, value: string) {
     setCellStates((current) => {
@@ -88,71 +99,112 @@ export default function InteractiveWorksheet({
         </div>
       </div>
 
-      <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-        {Array.from({ length: total }).map((_, index) => {
-          const problem = filled[index];
-          if (!problem) {
-            return <div key={`empty-${index}`} className={styles.emptyCell} aria-hidden />;
-          }
+      <div className={styles.activityBody}>
+        <div className={styles.gridPanel}>
+          <div
+            className={styles.grid}
+            style={{
+              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+            }}
+          >
+            {Array.from({ length: total }).map((_, index) => {
+              const problem = filled[index];
+              if (!problem) {
+                return <div key={`empty-${index}`} className={styles.emptyCell} aria-hidden />;
+              }
 
-          const cellState = cellStates[problem.id] ?? createInitialInteractiveState();
-          const liveAnswer = cellState.isSolved
-            ? { status: "correct" as const, normalizedValue: cellState.value }
-            : getLiveAnswerResult(cellState.value, problem.answer);
-          const isIncorrect = liveAnswer.status === "incorrect" || liveAnswer.status === "invalid";
-          const isSolved = cellState.isSolved;
-          const answerInputId = `interactive-answer-${problem.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-          const cellOperation = problem.operation ?? worksheetOperation ?? operation;
+              const cellState = cellStates[problem.id] ?? createInitialInteractiveState();
+              const liveAnswer = cellState.isSolved
+                ? { status: "correct" as const, normalizedValue: cellState.value }
+                : getLiveAnswerResult(cellState.value, problem.answer);
+              const isIncorrect = liveAnswer.status === "incorrect" || liveAnswer.status === "invalid";
+              const isSolved = cellState.isSolved;
+              const answerInputId = `interactive-answer-${problem.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+              const cellOperation = problem.operation ?? worksheetOperation ?? operation;
 
-          return (
-            <div
-              key={problem.id}
-              className={`${styles.cell} ${isSolved ? styles.cellSolved : ""} ${
-                isIncorrect ? styles.cellIncorrect : ""
-              }`.trim()}
-            >
-              <div className={styles.problemStack}>
-                <label className={styles.expression} htmlFor={answerInputId}>
-                  <span className={styles.topRow}>
-                    <span className={styles.topNumber}>{problem.a}</span>
-                  </span>
-                  <span className={styles.middleRow}>
-                    <span className={styles.operator}>{getOperationSymbol(cellOperation)}</span>
-                    <span className={styles.bottomNumber}>{problem.b}</span>
-                  </span>
-                  <span className={styles.lineRow} aria-hidden>
-                    <span className={styles.line} />
-                  </span>
-                </label>
+              return (
+                <div
+                  key={problem.id}
+                  className={`${styles.cell} ${isSolved ? styles.cellSolved : ""} ${
+                    isIncorrect ? styles.cellIncorrect : ""
+                  }`.trim()}
+                >
+                  <div className={styles.problemStack}>
+                    <label className={styles.expression} htmlFor={answerInputId}>
+                      <span className={styles.topRow}>
+                        <span className={styles.topNumber}>{problem.a}</span>
+                      </span>
+                      <span className={styles.middleRow}>
+                        <span className={styles.operator}>{getOperationSymbol(cellOperation)}</span>
+                        <span className={styles.bottomNumber}>{problem.b}</span>
+                      </span>
+                      <span className={styles.lineRow} aria-hidden>
+                        <span className={styles.line} />
+                      </span>
+                    </label>
 
-                <div className={styles.answerRow}>
-                  <input
-                    id={answerInputId}
-                    className={`${styles.input} ${isSolved ? styles.inputSolved : ""} ${
-                      isIncorrect ? styles.inputIncorrect : ""
-                    }`.trim()}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="-?[0-9]*"
-                    autoComplete="off"
-                    value={cellState.value}
-                    onChange={(event) => handleValueChange(problem, event.target.value)}
-                    aria-invalid={isIncorrect}
-                    readOnly={isSolved}
-                  />
-                  <span
-                    className={`${styles.status} ${isSolved ? styles.statusSolved : ""} ${
-                      isIncorrect ? styles.statusIncorrect : ""
-                    }`.trim()}
-                    aria-hidden={!isSolved && !isIncorrect}
-                  >
-                    {isSolved ? "✓" : isIncorrect ? "✕" : ""}
-                  </span>
+                    <div className={styles.answerRow}>
+                      <input
+                        id={answerInputId}
+                        className={`${styles.input} ${isSolved ? styles.inputSolved : ""} ${
+                          isIncorrect ? styles.inputIncorrect : ""
+                        }`.trim()}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="-?[0-9]*"
+                        autoComplete="off"
+                        value={cellState.value}
+                        onChange={(event) => handleValueChange(problem, event.target.value)}
+                        aria-invalid={isIncorrect}
+                        readOnly={isSolved}
+                      />
+                      <span
+                        className={`${styles.status} ${isSolved ? styles.statusSolved : ""} ${
+                          isIncorrect ? styles.statusIncorrect : ""
+                        }`.trim()}
+                        aria-hidden={!isSolved && !isIncorrect}
+                      >
+                        {isSolved ? "✓" : isIncorrect ? "✕" : ""}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <aside className={styles.rewardPanel} aria-live="polite">
+          <p className={styles.rewardTitle}>Pixel reward</p>
+          <p className={styles.rewardDescription}>Each correct answer reveals one square.</p>
+          <div className={styles.rewardCanvas}>
+            <div
+              className={styles.rewardGrid}
+              style={{ gridTemplateColumns: `repeat(${PIXEL_ART_COLUMNS}, minmax(0, 1fr))` }}
+            >
+              {Array.from({ length: rewardCellCount }).map((_, index) => {
+                const problem = filled[index];
+                const isAvailable = problem !== undefined;
+                const isRevealed = problem ? (cellStates[problem.id]?.isSolved ?? false) : false;
+                const token = isRevealed ? getRewardPixelToken(rewardPattern, index) : "blank";
+                return (
+                  <span
+                    key={`reward-${index}`}
+                    className={`${styles.rewardPixel} ${
+                      isAvailable ? styles.rewardPixelAvailable : styles.rewardPixelUnused
+                    } ${isRevealed ? styles.rewardPixelRevealed : ""}`.trim()}
+                    style={{ backgroundColor: PIXEL_TOKEN_COLORS[token] }}
+                    aria-hidden
+                  />
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+          {isComplete ? (
+            <p className={styles.rewardComplete}>Awesome! You revealed the {rewardPattern.label}.</p>
+          ) : null}
+        </aside>
       </div>
     </section>
   );
