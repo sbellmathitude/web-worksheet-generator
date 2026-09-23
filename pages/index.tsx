@@ -15,6 +15,7 @@ export default function Home() {
   const [mode, setMode] = useState<PracticeMode>("full");
   const [operation, setOperation] = useState<Operation>("multiplication");
   const [activity, setActivity] = useState<ActivityMode>("pdf");
+  const [interactiveSessionId, setInteractiveSessionId] = useState<number>(0);
 
   function handleGenerate(opts: {
     activity: ActivityMode;
@@ -60,6 +61,7 @@ export default function Home() {
     });
 
     setProblems(generated);
+    setInteractiveSessionId((current) => current + 1);
     setTimeout(() => {
       const el = document.getElementById("worksheet");
       if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -132,7 +134,7 @@ export default function Home() {
               </div>
             ) : (
               activity === 'interactive' ? (
-                <InteractiveWorksheet problems={problems} />
+                <InteractiveWorksheet problems={problems} sessionId={interactiveSessionId} />
               ) : (
                 <Worksheet
                   problems={problems}

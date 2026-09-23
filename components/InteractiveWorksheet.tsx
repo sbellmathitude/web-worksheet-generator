@@ -18,6 +18,7 @@ import styles from "../styles/InteractiveWorksheet.module.css";
 
 type Props = {
   problems: Problem[];
+  sessionId: number;
 };
 
 function buildInitialState(problems: Problem[]) {
@@ -26,7 +27,7 @@ function buildInitialState(problems: Problem[]) {
   ) as Record<string, InteractiveCellState>;
 }
 
-export default function InteractiveWorksheet({ problems }: Props) {
+export default function InteractiveWorksheet({ problems, sessionId }: Props) {
   const [cellStates, setCellStates] = useState<Record<string, InteractiveCellState>>(() =>
     buildInitialState(problems)
   );
@@ -35,7 +36,7 @@ export default function InteractiveWorksheet({ problems }: Props) {
   useEffect(() => {
     setCellStates(buildInitialState(problems));
     setRewardPattern(getRandomPixelArtPattern());
-  }, [problems]);
+  }, [problems, sessionId]);
 
   const solvedCount = useMemo(
     () => problems.filter((problem) => cellStates[problem.id]?.isSolved).length,
@@ -180,7 +181,8 @@ export default function InteractiveWorksheet({ problems }: Props) {
                       id={answerInputId}
                       className={`${styles.input} ${cellState.isSolved ? styles.inputSolved : ""}`.trim()}
                       type="text"
-                      inputMode="numeric"
+                      inputMode={operation === "subtraction" ? "text" : "numeric"}
+                      pattern="-?[0-9]*"
                       autoComplete="off"
                       value={cellState.value}
                       onChange={(event) => handleValueChange(problem.id, event.target.value)}
@@ -195,7 +197,11 @@ export default function InteractiveWorksheet({ problems }: Props) {
                   <p
                     id={answerFeedbackId}
                     className={`${styles.feedback} ${
-                      cellState.feedback?.tone === "success" ? styles.feedbackSuccess : styles.feedbackError
+                      cellState.feedback?.tone === "success"
+                        ? styles.feedbackSuccess
+                        : cellState.feedback?.tone === "error"
+                          ? styles.feedbackError
+                          : ""
                     }`.trim()}
                     aria-live="polite"
                   >
