@@ -152,8 +152,9 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
         <div className={styles.problemGrid}>
           {problems.map((problem, index) => {
             const cellState = cellStates[problem.id] ?? createInitialInteractiveState();
-            const answerInputId = `interactive-answer-${index}`;
-            const answerFeedbackId = `interactive-feedback-${index}`;
+            const idSuffix = problem.id.replace(/[^a-zA-Z0-9_-]/g, "-");
+            const answerInputId = `interactive-answer-${idSuffix}`;
+            const answerFeedbackId = `interactive-feedback-${idSuffix}`;
             const operation = problem.operation ?? "multiplication";
 
             return (
@@ -181,7 +182,7 @@ export default function InteractiveWorksheet({ problems, sessionId }: Props) {
                       id={answerInputId}
                       className={`${styles.input} ${cellState.isSolved ? styles.inputSolved : ""}`.trim()}
                       type="text"
-                      inputMode="decimal"
+                      inputMode="numeric"
                       pattern="-?[0-9]*"
                       autoComplete="off"
                       value={cellState.value}
