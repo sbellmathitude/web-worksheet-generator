@@ -104,9 +104,10 @@ export default function InteractiveWorksheet({
           <div
             className={styles.grid}
             style={{
-              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-              gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
-            }}
+  gap: "32px",
+  gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+  gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+}}
           >
             {Array.from({ length: total }).map((_, index) => {
               const problem = filled[index];
@@ -122,14 +123,17 @@ export default function InteractiveWorksheet({
               const isSolved = cellState.isSolved;
               const answerInputId = `interactive-answer-${problem.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
               const cellOperation = problem.operation ?? worksheetOperation ?? operation;
+              const token = isSolved ? getRewardPixelToken(rewardPattern, index) : "blank";
+              const cellBgColor = isSolved ? PIXEL_TOKEN_COLORS[token] : undefined;
 
               return (
-                <div
-                  key={problem.id}
-                  className={`${styles.cell} ${isSolved ? styles.cellSolved : ""} ${
-                    isIncorrect ? styles.cellIncorrect : ""
-                  }`.trim()}
-                >
+                  <div
+                      key={problem.id}
+                      className={`${styles.cell} ${isSolved ? styles.cellSolved : ""} ${
+                        isIncorrect ? styles.cellIncorrect : ""
+                      }`.trim()}
+                      style={{ backgroundColor: cellBgColor }}
+                    >
                   <div className={styles.problemStack}>
                     <label className={styles.expression} htmlFor={answerInputId}>
                       <span className={styles.topRow}>
@@ -175,36 +179,7 @@ export default function InteractiveWorksheet({
           </div>
         </div>
 
-        <aside className={styles.rewardPanel} aria-live="polite">
-          <p className={styles.rewardTitle}>Pixel reward</p>
-          <p className={styles.rewardDescription}>Each correct answer reveals one square.</p>
-          <div className={styles.rewardCanvas}>
-            <div
-              className={styles.rewardGrid}
-              style={{ gridTemplateColumns: `repeat(${PIXEL_ART_COLUMNS}, minmax(0, 1fr))` }}
-            >
-              {Array.from({ length: rewardCellCount }).map((_, index) => {
-                const problem = filled[index];
-                const isAvailable = problem !== undefined;
-                const isRevealed = problem ? (cellStates[problem.id]?.isSolved ?? false) : false;
-                const token = isRevealed ? getRewardPixelToken(rewardPattern, index) : "blank";
-                return (
-                  <span
-                    key={`reward-${index}`}
-                    className={`${styles.rewardPixel} ${
-                      isAvailable ? styles.rewardPixelAvailable : styles.rewardPixelUnused
-                    } ${isRevealed ? styles.rewardPixelRevealed : ""}`.trim()}
-                    style={{ backgroundColor: PIXEL_TOKEN_COLORS[token] }}
-                    aria-hidden
-                  />
-                );
-              })}
-            </div>
-          </div>
-          {isComplete ? (
-            <p className={styles.rewardComplete}>Awesome! You revealed the {rewardPattern.label}.</p>
-          ) : null}
-        </aside>
+        
       </div>
     </section>
   );

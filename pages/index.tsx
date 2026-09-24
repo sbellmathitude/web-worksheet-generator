@@ -128,7 +128,7 @@ export default function Home() {
           <div style={{ flex: 1 }} id="worksheet">
             {problems.length === 0 ? (
               <div style={{ padding: 28, background: "white", borderRadius: 8 }}>
-                <p style={{ marginTop: 0 }}>
+                <p style={{ marginTop: 0, fontSize: 24 }}>
                   No worksheet generated yet. Choose a practice type and layout, then click Generate.
                 </p>
               </div>
